@@ -1,0 +1,104 @@
+Metadata-Version: 2.1
+Name: private
+Version: 0.2.0
+Summary: Python modules and distribution encryption tool
+Home-page: https://gitlab.com/OmerSarig/private
+Author: Omer Sarig
+Author-email: omer@sarig.co.il
+License: UNKNOWN
+Keywords: encrypt package wheel obfuscate
+Platform: UNKNOWN
+Classifier: Development Status :: 2 - Pre-Alpha
+Classifier: Environment :: Console
+Classifier: Intended Audience :: Developers
+Classifier: License :: Freeware
+Classifier: Operating System :: POSIX
+Classifier: Programming Language :: Python :: 2 :: Only
+Classifier: Topic :: Security :: Cryptography
+Classifier: Topic :: Software Development :: Build Tools
+Requires-Python: >=2.7
+Description-Content-Type: text/markdown
+Requires-Dist: pyaes
+Requires-Dist: fire
+
+# Private
+
+Encryption tool for python files and packages.
+
+# Features
+
+* Encrypting python scripts and packages so they can be used as drop-in replacements.
+* Loading key from environment variable
+* Validating decrypted module against SHA256 signature
+* Works both with python 2 and python 3
+
+# Usage
+
+### Encryption:
+
+    $ private [--key <key>] [--output <directory>] [--predicate <expression>] file.py [<path>...]
+
+### Execution:
+
+    $ private --output out example-0.0-py2-none-any.whl
+    $ pip install out/example-0.0-py2-none-any.whl
+    $ export PRIVATE_KEY=$(cat out/key.txt)
+    # Use installed package as usual
+
+The key must be hexadecimal string of length 32.
+The file type is recognized by extension, Currently only .py and .whl files are supported.
+
+### Code removal
+
+The is an option to "tag" the source code with decorators.
+Then, It is possible to pass expression to the private script that specifies
+which tags to remove completely from the source.
+
+For example:
+
+    # example.py
+    import private
+
+    @private.tag("a", "b")
+    def foo():
+        return "foo"
+
+    @private.tag("b", "c")
+    def bar():
+        return "bar"
+
+    @private.tag("z")
+    def baz():
+        return "baz"
+
+Then, code parts to remove can be specified with regular python expression.
+To remove only the "bar" function, the predicate is simply: "c".
+To remove "foo" and "baz" the predicate is "a or z", or "not c".
+
+The private script is called like this:
+
+    $ private --predicate "b and not a or z" example.py
+
+will create encrypted file that contains only the function "foo".
+
+# Testing
+
+The package doesn't have it's own test suit.
+It is tested in python 2 with the compiledb package as a wheel, and in python 3
+with the full test suit of the construct package, on the original repository.
+
+# Limitations
+
+Private is not fully tested and is a hobby project in alpha stage, Use it at your own risk.
+
+# Future plans
+
+* Refactor the code to be more extensible
+* Add support for parallel execution
+* sdist distribution support
+* encrypt with faster crypto libraries
+* Full coverage and functionality testing
+* Adding documentation
+
+
+
