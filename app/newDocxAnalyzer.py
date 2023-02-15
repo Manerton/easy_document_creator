@@ -1,8 +1,9 @@
 from docx import Document
 from docx.oxml import OxmlElement
 from docx.text.paragraph import Paragraph
+import copy
 
-from HelpData import Tokens, TokenTypeString, TokenTypeCollection, TokenTypeList
+from HelpData import Tokens, TokenTypeString, TokenTypeCollection, TokenTypeList, SimpleParagraphData
 
 
 def get_font_and_size(runs, word):
@@ -22,6 +23,7 @@ class newDocxAnalyzer:
     document: Document
     tokens: Tokens
     data: any
+    paragraphs_in_work = []
 
     def open_document(self, name_file: str):
         self.document = Document(name_file)
@@ -35,7 +37,7 @@ class newDocxAnalyzer:
         for word in paragraph.text.split():
             if "{{" and "}}" in word:
                 if "." in word:
-                    self.tokens.add_token_type_collection(word, paragraph)
+                    self.tokens.add_token_type_collection(word, word, paragraph)
                 else:
                     style = paragraph.style.name
                     if 'List' in style:
@@ -69,35 +71,46 @@ class newDocxAnalyzer:
         set_font_and_size(paragraph.runs, new_name, font)
         return paragraph
 
-    def replace_str_list(self, main_key, key, value, be_more, token_repeat=None):
-        if be_more is not False:
-            pass
-        temp_token_collection: TokenTypeCollection = self.tokens.TokensTypeCollection.get(main_key)
-        for sub_token in temp_token_collection.sub_tokens:
-            if sub_token.main_token == key:
-                pass
+    def restoring_collection(self, last_token, token_collection: TokenTypeCollection):
+        copy_last_token = copy.copy(last_token)
+        for token in token_collection.sub_tokens:
+            value = token_collection.sub_tokens.get(token)
+            type_token = type(value)
+            if type_token == TokenTypeString:
+                if value.old_text_paragraph != copy_last_token.old_text_paragraph or last_token == value:
+                    copy_last_token.paragraph = self.insert_paragraph_after(last_token.paragraph, value.old_text_paragraph, value.paragraph)
+                    copy_last_token.old_text_paragraph = copy_last_token.paragraph.text
+                value.paragraph = copy_last_token.paragraph
+            else:
+                self.restoring_collection(copy_last_token, value)
 
-
-        pass
-
-    def replace_list_dict(self, main_key, list_data):
+    def replace_list_dict(self, main_key, list_data, collection=None):
         i = 1
+        temp_token_collection = collection
+        if collection is None:
+            temp_token_collection: TokenTypeCollection = self.tokens.TokensTypeCollection.get(main_key)
+        last_token = None
         for data in list_data:
-            be_more = False
+            if i < len(list_data):
+                be_more = True
+            else:
+                be_more = False
             for key in data:
-                if i < len(list_data):
-                    be_more = True
                 value = data.get(key)
                 type_value = type(value)
                 if type_value == str:
-                    self.replace_str_list(main_key, key, value, be_more)
-                elif type_value == list:
-                    pass
-
-            i = i+1
+                    sub_token: TokenTypeString = temp_token_collection.sub_tokens.get(key)
+                    self.replace_str_in_paragraph(sub_token.paragraph, sub_token.main_token, value)
+                    last_token = sub_token
+                else:
+                    sub_token: TokenTypeCollection = temp_token_collection.sub_tokens.get(key)
+                    last_token = self.replace_list_dict(key, value, sub_token)
+            if be_more and last_token is not None:
+                self.restoring_collection(last_token, temp_token_collection)
+            i = i + 1
+        return last_token
 
     def list_number(self, par, prev=None, level=None, num=True):
-
         xpath_options = {
             True: {'single': 'count(w:lvl)=1 and ', 'level': 0},
             False: {'single': '', 'level': level},
@@ -166,15 +179,21 @@ class newDocxAnalyzer:
         par._p.get_or_add_pPr().get_or_add_numPr().get_or_add_numId().val = num
         par._p.get_or_add_pPr().get_or_add_numPr().get_or_add_ilvl().val = level
 
-    def insert_paragraph_after(self, paragraph, text=None):
+    def get_level_paragraph(self, paragraph: Paragraph):
+        return paragraph._p.pPr.numPr.ilvl.val
+
+    def insert_paragraph_after(self, paragraph, text=None, repeat_paragraph=None):
         """Вставка нового параграфа после указанного"""
         new_p = OxmlElement("w:p")
         paragraph._p.addnext(new_p)
         new_para = Paragraph(new_p, paragraph._parent)
+        level = None
         if text:
             new_para.add_run(text)
-
-        self.list_number(new_para, paragraph)
+        if repeat_paragraph:
+            new_para.style = repeat_paragraph.style
+            level = self.get_level_paragraph(repeat_paragraph)
+        self.list_number(new_para, paragraph, level)
         return new_para
 
     def replace_list(self, main_token, values):
@@ -187,12 +206,13 @@ class newDocxAnalyzer:
             self.replace_str_in_paragraph(temp_token.paragraph, temp_token.main_token, value)
             if new_paragraph is not None:
                 temp_token.paragraph = new_paragraph
-            i = i+1
+            i = i + 1
 
     def analyze_type_in_list(self, main_key, list_data):
-        if list_data[0] is dict:
+        temp_type = type(list_data[0])
+        if temp_type == dict:
             self.replace_list_dict(main_key, list_data)
-        elif list_data[0] is str:
+        elif temp_type == str:
             self.replace_list(main_key, list_data)
 
     def start_replace(self):
