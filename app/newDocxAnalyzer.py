@@ -29,15 +29,25 @@ class newDocxAnalyzer:
         self.document = Document(name_file)
         self.tokens = Tokens()
 
+    def search_token_tables(self, tables):
+        for table in tables:
+            for row in table.rows:
+                for cell in row.cells:
+                    self.search_token_paragraph(cell.paragraph, table)
+
+
     def start_search_tokens(self):
+        tables = self.document.tables
+        if len(tables) != 0:
+            self.search_token_tables(tables)
         paragraphs = self.document.paragraphs
         self.search_token_paragraph(paragraphs)
 
-    def analyze_token_type(self, paragraph: Paragraph):
+    def analyze_token_type(self, paragraph: Paragraph, is_table=None):
         for word in paragraph.text.split():
             if "{{" and "}}" in word:
                 if "." in word:
-                    self.tokens.add_token_type_collection(word, word, paragraph)
+                    self.tokens.add_token_type_collection(word, word, paragraph, is_table)
                 else:
                     style = paragraph.style.name
                     if 'List' in style:
@@ -45,7 +55,7 @@ class newDocxAnalyzer:
                     else:
                         self.tokens.add_token_type_string(word, paragraph)
 
-    def search_token_paragraph(self, paragraphs):
+    def search_token_paragraph(self, paragraphs, table=None):
         for paragraph in paragraphs:
             if "{{" and "}}" in paragraph.text:
                 self.analyze_token_type(paragraph)
@@ -78,11 +88,16 @@ class newDocxAnalyzer:
             type_token = type(value)
             if type_token == TokenTypeString:
                 if value.old_text_paragraph != copy_last_token.old_text_paragraph or last_token == value:
-                    copy_last_token.paragraph = self.insert_paragraph_after(last_token.paragraph, value.old_text_paragraph, value.paragraph)
+                    copy_last_token.paragraph = self.insert_paragraph_after(copy_last_token.paragraph,
+                                                                            value.old_text_paragraph, value.paragraph)
                     copy_last_token.old_text_paragraph = copy_last_token.paragraph.text
                 value.paragraph = copy_last_token.paragraph
             else:
                 self.restoring_collection(copy_last_token, value)
+
+    def restoring_collection_in_table(self, token_collection: TokenTypeCollection):
+        for token in token_collection.sub_tokens:
+            pass
 
     def replace_list_dict(self, main_key, list_data, collection=None):
         i = 1
@@ -103,8 +118,15 @@ class newDocxAnalyzer:
                     self.replace_str_in_paragraph(sub_token.paragraph, sub_token.main_token, value)
                     last_token = sub_token
                 else:
-                    sub_token: TokenTypeCollection = temp_token_collection.sub_tokens.get(key)
-                    last_token = self.replace_list_dict(key, value, sub_token)
+                    temp_type = type(value[0])
+                    if temp_type == dict:
+                        sub_token: TokenTypeCollection = temp_token_collection.sub_tokens.get(key)
+                        last_token = self.replace_list_dict(key, value, sub_token)
+                    elif temp_type == str:
+                        sub_token: TokenTypeString = temp_token_collection.sub_tokens.get(key)
+                        last_token = self.replace_list(main_key, value, sub_token)
+            if be_more and collection is None and temp_token_collection.is_table:
+                self.restoring_collection_in_table(temp_token_collection)
             if be_more and last_token is not None:
                 self.restoring_collection(last_token, temp_token_collection)
             i = i + 1
@@ -196,17 +218,22 @@ class newDocxAnalyzer:
         self.list_number(new_para, paragraph, level)
         return new_para
 
-    def replace_list(self, main_token, values):
-        temp_token: TokenTypeList = self.tokens.TokensTypeList.get(main_token)
+    def replace_list(self, main_token, values, collection=None):
+        if collection is None:
+            temp_token: TokenTypeString = self.tokens.TokensTypeString.get(main_token)
+        else:
+            temp_token: TokenTypeString = collection
         i = 1
         for value in values:
             new_paragraph = None
             if i < len(values):
-                new_paragraph = self.insert_paragraph_after(temp_token.paragraph, temp_token.paragraph.text)
+                new_paragraph = self.insert_paragraph_after(temp_token.paragraph, temp_token.paragraph.text,
+                                                            temp_token.paragraph)
             self.replace_str_in_paragraph(temp_token.paragraph, temp_token.main_token, value)
             if new_paragraph is not None:
                 temp_token.paragraph = new_paragraph
             i = i + 1
+        return temp_token
 
     def analyze_type_in_list(self, main_key, list_data):
         temp_type = type(list_data[0])

@@ -46,8 +46,6 @@ class Tokens:
     TokensTypeCollection = {}
     TokensTypeList = {}
 
-
-
     def add_token_type_list(self, main_token, paragraph):
         temp_token = TokenTypeString()
         temp_token.paragraph = paragraph
@@ -62,7 +60,7 @@ class Tokens:
         clear_token = main_token.translate({ord(i): None for i in '{}'})
         self.TokensTypeString.update({clear_token: temp_token})
 
-    def add_token_type_collection(self, main_token, full_name, paragraph, is_table=False, parent=None):
+    def add_token_type_collection(self, main_token, full_name, paragraph, is_table=None, parent=None):
         clear_token = main_token.translate({ord(i): None for i in '{}'})
         clear_token_list = clear_token.split('.')
         if parent is not None:
@@ -79,7 +77,7 @@ class Tokens:
             else:
                 delete_str = clear_token_list[0] + "."
                 clear_token = remove_prefix(clear_token, delete_str)
-                self.add_token_type_collection(clear_token, full_name, paragraph, is_table, parent_token)
+                self.add_token_type_collection(clear_token, full_name, paragraph, None, parent_token)
         else:
             temp_token = TokenTypeCollection()
             temp_token.is_table = is_table
