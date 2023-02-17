@@ -3,7 +3,7 @@ from docx.oxml import OxmlElement
 from docx.text.paragraph import Paragraph
 import copy
 
-from HelpData import Tokens, TokenTypeString, TokenTypeCollection, TokenTypeList, SimpleParagraphData
+from HelpData import Tokens, TokenTypeString, TokenTypeCollection, SimpleParagraphData, SupportTable
 
 
 def get_font_and_size(runs, word):
@@ -33,8 +33,11 @@ class newDocxAnalyzer:
         for table in tables:
             for row in table.rows:
                 for cell in row.cells:
-                    self.search_token_paragraph(cell.paragraph, table)
-
+                    sup_table = SupportTable()
+                    sup_table.table = table
+                    sup_table.last_row = row
+                    sup_table.old_row = copy.copy(row)
+                    self.search_token_paragraph(cell.paragraphs, sup_table)
 
     def start_search_tokens(self):
         tables = self.document.tables
@@ -58,10 +61,7 @@ class newDocxAnalyzer:
     def search_token_paragraph(self, paragraphs, table=None):
         for paragraph in paragraphs:
             if "{{" and "}}" in paragraph.text:
-                self.analyze_token_type(paragraph)
-
-    def search_token_table(self, table):
-        pass
+                self.analyze_token_type(paragraph, table)
 
     def init_data(self, data):
         self.data = data
@@ -95,9 +95,19 @@ class newDocxAnalyzer:
             else:
                 self.restoring_collection(copy_last_token, value)
 
+    def insert_after_row(self, table, ix):
+        tbl = table._tbl
+        successor = tbl.tr_lst[ix]
+        tr = tbl._new_tr()
+        for gridCol in tbl.tblGrid.gridCol_lst:
+            tc = tr.add_tc()
+            tc.width = gridCol.w
+        successor.addprevious(tr)
+        return table.rows[ix]
+
     def restoring_collection_in_table(self, token_collection: TokenTypeCollection):
-        for token in token_collection.sub_tokens:
-            pass
+        for cell in token_collection.table.last_row.cells:
+            self.search_token_paragraph(cell.paragraphs)
 
     def replace_list_dict(self, main_key, list_data, collection=None):
         i = 1
@@ -108,6 +118,16 @@ class newDocxAnalyzer:
         for data in list_data:
             if i < len(list_data):
                 be_more = True
+                if temp_token_collection.table:
+                    index = temp_token_collection.table.last_row._index
+                    temp_token_collection.table.last_row = self.insert_after_row(temp_token_collection.table.table,
+                                                                                 index)
+                    for i, index in enumerate(temp_token_collection.table.old_row.cells):
+                        temp_token_collection.table.last_row.cells[i].paragraphs = copy.copy(index.paragraphs)
+                        # for j, paragraph in enumerate(index.paragraphs):
+                        #     temp_token_collection.table.last_row.cells[i] = copy.copy()
+                        #     temp_token_collection.table.last_row.cells[i].paragraphs[0].style = paragraph.style
+
             else:
                 be_more = False
             for key in data:
@@ -125,9 +145,9 @@ class newDocxAnalyzer:
                     elif temp_type == str:
                         sub_token: TokenTypeString = temp_token_collection.sub_tokens.get(key)
                         last_token = self.replace_list(main_key, value, sub_token)
-            if be_more and collection is None and temp_token_collection.is_table:
+            if be_more and collection is None and temp_token_collection.table:
                 self.restoring_collection_in_table(temp_token_collection)
-            if be_more and last_token is not None:
+            elif be_more and last_token is not None:
                 self.restoring_collection(last_token, temp_token_collection)
             i = i + 1
         return last_token

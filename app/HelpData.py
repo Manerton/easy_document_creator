@@ -9,26 +9,32 @@ class TokenTypeString:
 
     def __init__(self):
         self.paragraph = None
-        self.old_text_paragraph = None
-        self.main_token = None
+        self.old_text_paragraph = ''
+        self.main_token = ''
 
 
-class TokenTypeList:
-    paragraph: Paragraph
-    main_token: str
+class SupportTable:
+    table: any
+    last_row: any
+    old_row: any
+
+    def __init__(self):
+        self.table = None
+        self.last_row = None
+        self.old_row = None
 
 
 class TokenTypeCollection:
     parent: any
     main_token: str
     sub_tokens: dict
-    is_table: bool
+    table: SupportTable
 
     def __init__(self):
         self.parent = None
         self.main_token = ''
         self.sub_tokens = {}
-        self.is_table = False
+        self.table = SupportTable()
 
 
 def remove_prefix(text, prefix):
@@ -60,7 +66,7 @@ class Tokens:
         clear_token = main_token.translate({ord(i): None for i in '{}'})
         self.TokensTypeString.update({clear_token: temp_token})
 
-    def add_token_type_collection(self, main_token, full_name, paragraph, is_table=None, parent=None):
+    def add_token_type_collection(self, main_token, full_name, paragraph, table=None, parent=None):
         clear_token = main_token.translate({ord(i): None for i in '{}'})
         clear_token_list = clear_token.split('.')
         if parent is not None:
@@ -80,7 +86,7 @@ class Tokens:
                 self.add_token_type_collection(clear_token, full_name, paragraph, None, parent_token)
         else:
             temp_token = TokenTypeCollection()
-            temp_token.is_table = is_table
+            temp_token.table = table
             temp_token.main_token = clear_token_list[0]
             sub_token = TokenTypeString()
             sub_token.old_text_paragraph = paragraph.text
