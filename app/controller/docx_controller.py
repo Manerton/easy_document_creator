@@ -1,18 +1,9 @@
-from flask import Flask, send_from_directory, render_template
+from app.app import app
 from flask import request, flash, redirect, url_for
-from docx_analyzer import DocxAnalyzer
+from app.docx_analyzer import DocxAnalyzer
 from werkzeug.utils import secure_filename
 import os
 import json
-
-app = Flask(__name__)
-
-# папка для сохранения загруженных файлов
-UPLOAD_FOLDER = './filedownloads'
-
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-
-
 
 doc = DocxAnalyzer()
 
@@ -51,18 +42,3 @@ def init_file_docx():
     doc.start_replace()
     doc.save_file(os.path.join(app.config['UPLOAD_FOLDER'], save_file))
     return redirect(url_for('download_file', name=save_file))
-
-
-
-@app.route("/api", methods=['GET'])
-def start_page():
-    return render_template("index.html")
-
-
-@app.route('/uploads/<name>')
-def download_file(name):
-    return send_from_directory('C:/Users/assba/PycharmProjects/easy_document_creator/filedownloads/', name)
-
-
-if __name__ == '__main__':
-    app.run()

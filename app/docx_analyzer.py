@@ -3,23 +3,11 @@ from docx.oxml import OxmlElement
 from docx.text.paragraph import Paragraph
 import copy
 
-from HelpData import Tokens, TokenTypeString, TokenTypeCollection, SimpleParagraphData, SupportTable
+from HelpData import Tokens, TokenTypeString, TokenTypeCollection, SimpleParagraphData, SupportTable, get_font_and_size, \
+    set_font_and_size
 
 
-def get_font_and_size(runs, word):
-    for run in runs:
-        if word in run.text:
-            return run.font
-
-
-def set_font_and_size(runs, word, font):
-    for run in runs:
-        if word in run.text:
-            run.font.name = font.name
-            run.font.size = font.size
-
-
-class newDocxAnalyzer:
+class DocxAnalyzer:
     document: Document
     tokens: Tokens
     data: any
@@ -89,7 +77,8 @@ class newDocxAnalyzer:
             if type_token == TokenTypeString:
                 if value.old_text_paragraph != copy_last_token.old_text_paragraph or last_token == value:
                     copy_last_token.paragraph = self.insert_paragraph_after(copy_last_token.paragraph,
-                                                                            value.old_text_paragraph, value.paragraph)
+                                                                            value.old_text_paragraph, value.paragraph,
+                                                                            value.font)
                     copy_last_token.old_text_paragraph = copy_last_token.paragraph.text
                 value.paragraph = copy_last_token.paragraph
             else:
@@ -123,10 +112,12 @@ class newDocxAnalyzer:
                     temp_token_collection.table.last_row = self.insert_after_row(temp_token_collection.table.table,
                                                                                  index)
                     for i, index in enumerate(temp_token_collection.table.old_row.cells):
-                        temp_token_collection.table.last_row.cells[i].paragraphs = copy.copy(index.paragraphs)
-                        # for j, paragraph in enumerate(index.paragraphs):
-                        #     temp_token_collection.table.last_row.cells[i] = copy.copy()
-                        #     temp_token_collection.table.last_row.cells[i].paragraphs[0].style = paragraph.style
+                        for j, paragraph in enumerate(index.paragraphs):
+                            font = get_font_and_size(paragraph.runs, paragraph.text)
+                            temp_token_collection.table.last_row.cells[i].paragraphs[j].text = paragraph.text
+                            temp_token_collection.table.last_row.cells[i].paragraphs[j].style = paragraph.style
+                            set_font_and_size(temp_token_collection.table.last_row.cells[i].paragraphs[j].runs,
+                                              paragraph.text, font)
 
             else:
                 be_more = False
@@ -224,7 +215,7 @@ class newDocxAnalyzer:
     def get_level_paragraph(self, paragraph: Paragraph):
         return paragraph._p.pPr.numPr.ilvl.val
 
-    def insert_paragraph_after(self, paragraph, text=None, repeat_paragraph=None):
+    def insert_paragraph_after(self, paragraph, text=None, repeat_paragraph=None, font=None):
         """Вставка нового параграфа после указанного"""
         new_p = OxmlElement("w:p")
         paragraph._p.addnext(new_p)
@@ -233,6 +224,7 @@ class newDocxAnalyzer:
         if text:
             new_para.add_run(text)
         if repeat_paragraph:
+            set_font_and_size(new_para.runs, text, font)
             new_para.style = repeat_paragraph.style
             level = self.get_level_paragraph(repeat_paragraph)
         self.list_number(new_para, paragraph, level)
@@ -248,7 +240,7 @@ class newDocxAnalyzer:
             new_paragraph = None
             if i < len(values):
                 new_paragraph = self.insert_paragraph_after(temp_token.paragraph, temp_token.paragraph.text,
-                                                            temp_token.paragraph)
+                                                            temp_token.paragraph, temp_token.font)
             self.replace_str_in_paragraph(temp_token.paragraph, temp_token.main_token, value)
             if new_paragraph is not None:
                 temp_token.paragraph = new_paragraph

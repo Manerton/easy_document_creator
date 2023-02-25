@@ -1,15 +1,16 @@
-from enum import Enum
 from docx.text.paragraph import Paragraph
 
 
 class TokenTypeString:
     paragraph: Paragraph
     old_text_paragraph: str
+    font: any
     main_token: str
 
     def __init__(self):
         self.paragraph = None
         self.old_text_paragraph = ''
+        self.font = None
         self.main_token = ''
 
 
@@ -40,6 +41,17 @@ class TokenTypeCollection:
 def remove_prefix(text, prefix):
     return text[text.startswith(prefix) and len(prefix):]
 
+def get_font_and_size(runs, word):
+    for run in runs:
+        if word in run.text:
+            return run.font
+
+
+def set_font_and_size(runs, word, font):
+    for run in runs:
+        if word in run.text:
+            run.font.name = font.name
+            run.font.size = font.size
 
 class SimpleParagraphData:
     text: str
@@ -66,8 +78,9 @@ class Tokens:
         clear_token = main_token.translate({ord(i): None for i in '{}'})
         self.TokensTypeString.update({clear_token: temp_token})
 
-    def add_token_type_collection(self, main_token, full_name, paragraph, table=None, parent=None):
+    def add_token_type_collection(self, main_token, full_name, paragraph :Paragraph, table=None, parent=None):
         clear_token = main_token.translate({ord(i): None for i in '{}'})
+        font = get_font_and_size(paragraph.runs, clear_token)
         clear_token_list = clear_token.split('.')
         if parent is not None:
             parent_token: TokenTypeCollection = parent.sub_tokens.get(clear_token_list[0])
@@ -77,6 +90,7 @@ class Tokens:
             if len(clear_token_list) == 2:
                 sub_token = TokenTypeString()
                 sub_token.main_token = full_name
+                sub_token.font = font
                 sub_token.old_text_paragraph = paragraph.text
                 sub_token.paragraph = paragraph
                 parent_token.sub_tokens.update({clear_token_list[1]: sub_token})
@@ -89,6 +103,7 @@ class Tokens:
             temp_token.table = table
             temp_token.main_token = clear_token_list[0]
             sub_token = TokenTypeString()
+            sub_token.font = font
             sub_token.old_text_paragraph = paragraph.text
             sub_token.main_token = full_name
             sub_token.paragraph = paragraph

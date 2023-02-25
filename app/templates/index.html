@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="container-fluid">
+        <div class="row">
+            <nav class="col-md-2 bg-light">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link">
+                            Процессы
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                         <a class="nav-link">
+                            API ключи
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="col-md-9">
+                <h1>{% block title %} Загрузить новый шаблон {% endblock %}</h1>
+                <div class="">
+                     <form action="/api/generate/file-docx" method=post enctype=multipart/form-data>
+                        <input type=file name=file multiple="">
+                        <input class="btn btn-primary" type=submit value=Upload>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
