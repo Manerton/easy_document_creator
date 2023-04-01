@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+        <h1>{% block title %} API ключи {% endblock %}</h1>
+    </div>
+    <div class="">
+        <div class="d-flex pb-3">
+            <button class="btn btn-primary">Создать ключ</button>
+        </div>
+        <div class="table-wrapper has-mobile-cards">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th draggable="false" class="is-sortable is-unselectable" style="width: 50%;">
+                        <div class="th-wrap">
+                            <span class="is-relative">
+                                Название
+                            </span>
+                        </div>
+                    </th>
+                    <th draggable="false" class="is-sortable is-unselectable is-current-sort">
+                        <div class="th-wrap">
+                            <span class="is-relative">
+                                Ключ
+                            </span>
+                        </div>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr draggable="false" class="">
+                    <td data-label="Название" class="">
+                        Сервис новостей
+                    </td>
+                    <td data-label="Ключ" class="">
+                        7549ef3003824221a826df4a55581c89
+                    </td>
+                </tr>
+                <tr draggable="false" class="">
+                    <td data-label="Название" class="">
+                        Реестр открытых данных
+                    </td>
+                    <td data-label="Ключ" class="">
+                        913fd2e9d81c44e8927b77dd36e31961
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+    </div>
+    </div>
+{% endblock %}

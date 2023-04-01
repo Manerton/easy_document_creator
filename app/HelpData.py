@@ -41,17 +41,21 @@ class TokenTypeCollection:
 def remove_prefix(text, prefix):
     return text[text.startswith(prefix) and len(prefix):]
 
+
 def get_font_and_size(runs, word):
     for run in runs:
-        if word in run.text:
+        if word in run.text or run.text in word:
             return run.font
 
 
 def set_font_and_size(runs, word, font):
+    if font is None:
+        pass
     for run in runs:
         if word in run.text:
             run.font.name = font.name
             run.font.size = font.size
+
 
 class SimpleParagraphData:
     text: str

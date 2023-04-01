@@ -1,11 +1,9 @@
-from app.app import app
-from flask import request, flash, redirect, url_for
+from app.main import app
+from flask import request, flash, redirect, url_for, render_template
 from app.docx_analyzer import DocxAnalyzer
 from werkzeug.utils import secure_filename
 import os
 import json
-
-doc = DocxAnalyzer()
 
 ALLOWED_EXTENSIONS = {'docx', 'json'}
 
@@ -23,9 +21,10 @@ def init_file_docx():
         return redirect(request.url)
     files = request.files.getlist("file")
     save_file = 'NotName'
+    doc = DocxAnalyzer()
     for file in files:
         if file.filename == '':
-            flash('Нет выюранного файла')
+            flash('Нет выбранного файла')
             return redirect(request.url)
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
@@ -42,3 +41,4 @@ def init_file_docx():
     doc.start_replace()
     doc.save_file(os.path.join(app.config['UPLOAD_FOLDER'], save_file))
     return redirect(url_for('download_file', name=save_file))
+

@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+         <h1>{% block title %} Процессы {% endblock %}</h1>
+    </div>
+    <div class="d-flex pb-3">
+        <button class="btn btn-primary">Создать процесс</button>
+
+    </div>
+    <div class="table-wrapper has-mobile-cards">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th draggable="false" class="is-sortable is-unselectable" style="width: 50%;">
+                        <div class="th-wrap">
+                            <span class="is-relative">
+                                Название
+                            </span>
+                        </div>
+                    </th>
+                    <th draggable="false" class="is-sortable is-unselectable is-current-sort">
+                        <div class="th-wrap">
+                            <span class="is-relative">
+                                Дата последнего использования
+                            </span>
+                        </div>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr draggable="false" class="">
+                    <td data-label="Название" class="">
+                        Отчёт по количеству посещений
+                    </td>
+                    <td data-label="Дата последнего использования" class="">
+                        26.02.2023 14:51
+                    </td>
+                </tr>
+                <tr draggable="false" class="">
+                    <td data-label="Название" class="">
+                        Статистика посещения
+                    </td>
+                    <td data-label="Дата последнего использования" class="">
+                        27.02.2023 10:32
+                    </td>
+                </tr>
+                <tr draggable="false" class="">
+                    <td data-label="Название" class="">
+                        Статистика публикаций
+                    </td>
+                    <td data-label="Дата последнего использования" class="">
+                        27.02.2023 11:11
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
