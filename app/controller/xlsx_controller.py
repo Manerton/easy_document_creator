@@ -1,4 +1,7 @@
+import json
 import os
+
+from datetime import date
 
 from flask import request, flash, redirect
 from werkzeug.utils import secure_filename
@@ -22,6 +25,7 @@ def init_file_xlsx():
         return redirect(request.url)
     files = request.files.getlist("file")
     doc = XlsxAnalyzer()
+    save_file = "NotName"
     for file in files:
         if file.filename == '':
             flash('Нет выбранного файла')
@@ -30,6 +34,16 @@ def init_file_xlsx():
             filename = secure_filename(file.filename)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             if 'xlsx' in filename:
+                save_file = str(date.today()) + filename
                 doc.open_document(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-                doc.start()
-
+                doc.start_search()
+            elif 'json' in filename:
+                with open(os.path.join(app.config['UPLOAD_FOLDER'], filename), encoding="utf8") as read_file:
+                    data = json.load(read_file)
+                    read_file.close()
+                doc.init_data(data)
+    doc.start_replace()
+    doc.save_document(os.path.join(app.config['UPLOAD_FOLDER'], save_file))
+    return "ok"
+    # doc.save_file(os.path.join(app.config['UPLOAD_FOLDER'], save_file))
+    # return redirect(url_for('download_file', name=save_file))
