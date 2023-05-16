@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="column is-4 is-offset-4">
+    <div class="box">
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="notification is-danger">
+                {{ messages[0] }}. Перейти на <a href="{{ url_for('auth.login') }}">login</a>.
+            </div>
+        {% endif %}
+        {% endwith %}
+        <div class="col-md-8 col-lg-6 col-xl-4 offset-xl-1">
+            <h3 class="title mb-3">Sign Up</h3>
+            <form method="POST" action="{{ url_for('auth.signup') }}">
+                <!-- Email input -->
+                <div class="form-outline mb-1">
+                    <label class="form-label mt-1" for="form3Example3">Email address</label>
+                    <input type="email" name="email" class="form-control"
+                      placeholder="Enter a valid email address" />
+                </div>
+                 <!-- Password input -->
+                <div class="form-outline mb-1">
+                    <label class="form-label mt-1" for="form3Example3">Name</label>
+                    <input type="text" name="name" class="form-control"
+                      placeholder="Enter a valid email address" />
+                </div>
+                <!-- Password input -->
+                <div class="form-outline mb-1">
+                    <label class="form-label mt-1" for="form3Example4">Password</label>
+                    <input type="password" name="password" class="form-control"
+                      placeholder="Enter password" />
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center">
+                <!-- Checkbox -->
+                    <div class="form-check mb-1">
+                        <input class="form-check-input me-2" type="checkbox" value="" id="form2Example3" />
+                        <label class="form-check-label" for="form2Example3">
+                            Remember me
+                        </label>
+                    </div>
+                </div>
+                 <div class="form-outline mb-1">
+                    <button class="btn btn-primary form-control">Sign Up</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

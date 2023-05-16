@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+        <h1>{% block title %} Загрузить новый шаблон {% endblock %}</h1>
+    </div>
+
+    <div class="">
+        <form action="/api/generate/file-docx" method=post enctype=multipart/form-data>
+            <input type=file name=file autocomplete="off">
+            <input class="btn btn-primary" type=submit value=Upload>
+        </form>
+    </div>
+
+    <div class="">
+        <form action="/api/generate/file-xlsx" method=post enctype=multipart/form-data>
+            <input type=file name=file autocomplete="off">
+            <input class="btn btn-primary" type=submit value=Upload>
+        </form>
+    </div>
+{% endblock %}

@@ -1,9 +1,13 @@
 from app.main import app
-from flask import request, flash, redirect, url_for, render_template
+from flask import request, flash, redirect, url_for, render_template, Blueprint
 from app.docx_analyzer import DocxAnalyzer
 from werkzeug.utils import secure_filename
 import os
 import json
+
+
+docx = Blueprint('docx', __name__)
+
 
 ALLOWED_EXTENSIONS = {'docx', 'json'}
 
@@ -14,10 +18,10 @@ def allowed_file(filename):
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
-@app.route("/api/generate/file-docx", methods=['POST'])
+@docx.route("/api/generate/file-docx", methods=['POST'])
 def init_file_docx():
-    if 'file' not in request.files:
-        flash('Не читаемый файл')
+    if not request.files.get('file', None):
+        flash('Файл не выбран')
         return redirect(request.url)
     files = request.files.getlist("file")
     save_file = 'NotName'
