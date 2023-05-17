@@ -8,12 +8,55 @@
             {% endblock %}
         </h1>
     </div>
-    <form action="{{ url_for('xlsx.file_xlsx', process_id=process.id) }}" method="POST" enctype=multipart/form-data>
-
+    <div>{{ process.name }}</div>
+    <form action="{% if process.file_type == "xlsx" %} {{ url_for('xlsx.file_xlsx', process_id=process.id) }} {% endif %}
+                 {% if process.file_type == "docx" %} {{ url_for('docx.file_docx', process_id=process.id) }} {% endif %}"
+          method="POST" enctype=multipart/form-data>
         <div class="form-group">
             <label for="exampleFormControlFile1">JSON документ</label>
             <input type="file" name=file class="form-control-file">
          </div>
         <button class="btn btn-primary">Выполнить</button>
     </form>
+    {% if myfiles %}
+    <div class="mt-3 table-wrapper has-mobile-cards">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th draggable="false" class="is-sortable is-unselectable" >
+                        <div class="th-wrap">
+                            <span class="is-relative">
+                                Название
+                            </span>
+                        </div>
+                    </th>
+                    <th draggable="false" class="is-sortable is-unselectable" >
+                        <div class="th-wrap">
+                            <span class="is-relative">
+                                Опции
+                            </span>
+                        </div>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for myfile in myfiles %}
+                <tr draggable="false" class="">
+                    <td data-label="Название" class="">
+                        {{myfile.filename}}
+                    </td>
+                    <td>
+                        <a class="bi bi-trash btn btn-outline-danger" href=""></a>
+                        <a class="bi bi-download btn btn-outline-success" href="{{ url_for('process.download_result_file', id = myfile.id) }}"></a>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+    {% if not myfiles %}
+        <p>Файлы отсутствуют</p>
+    {% endif %}
+
 {% endblock %}

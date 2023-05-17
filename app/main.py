@@ -9,7 +9,7 @@ app = Flask(__name__)
 app.secret_key = os.urandom(24)
 
 # папка для сохранения загруженных файлов
-UPLOAD_FOLDER = '../filedownloads'
+UPLOAD_FOLDER = '../temp_downloads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 login_manager = LoginManager()

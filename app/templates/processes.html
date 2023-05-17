@@ -43,10 +43,12 @@
             {% for process in _processes %}
                 <tr draggable="false" class="">
                     <td data-label="Название" class="">
+                        {% if process.file_type == "xlsx" %}<i class="bi bi-filetype-xlsx"></i> {% endif %}
+                        {% if process.file_type == "docx" %}<i class="bi bi-filetype-docx"></i> {% endif %}
                         {{process.name}}
                     </td>
                     <td data-label="Описание" class="">
-                        {{process.description}}
+                        {{ process.description }}
                     </td>
                     <td>
                         <a href="{{ url_for('process.get_process', id=process.id) }}" role="button" class="bi bi-pencil btn btn-outline-primary" >

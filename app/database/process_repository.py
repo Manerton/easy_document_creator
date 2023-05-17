@@ -4,13 +4,14 @@ from bson import ObjectId
 from app.database.db import db, put_file_database, get_file_database, delete_file_database
 from app.models.process import Process
 
-processes_collection: flask_pymongo.wrappers.Database = db.processes_collection
+processes_collection: flask_pymongo.wrappers.Database = db.Processes
 
 
 def process_helper(process) -> dict:
     return {
         "id": str(process["_id"]),
         "name": process["name"],
+        "file_type": process["file_type"],
         "description": process["description"],
         "file_id": process["file_id"]
     }
@@ -53,8 +54,8 @@ def delete_process(process_id: str):
 
 
 # Добавленеи в базу файла
-def put_file(file):
-    return put_file_database(file, filename=file.filename)
+def put_file(file, filename):
+    return put_file_database(file, filename=filename)
 
 
 # Получение файла из базы

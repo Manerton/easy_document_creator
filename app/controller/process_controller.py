@@ -9,7 +9,13 @@ from app.database.process_repository import (
     update_process,
     delete_process,
     put_file,
-    get_file, get_file_database,
+    get_file,
+    delete_file
+)
+
+from app.database.file_repository import (
+    get_myfiles,
+    get_myfile_by_id,
     delete_file
 )
 from app.models.process import Process
@@ -41,8 +47,9 @@ def get_process(id=None):
 @login_required
 def open_process(id):
     _process = get_process_by_id(id)
+    myfiles = get_myfiles(_process['file_id'])
     if _process:
-        return render_template('open_process.html', process=_process)
+        return render_template('open_process.html', process=_process, myfiles=myfiles)
 
 
 @process.route('/api/processes/add', methods=['POST'])
@@ -55,8 +62,9 @@ def insert_process_data():
     name = request.form.get('name')
     description = request.form.get('description')
     if name and description and file:
-        file_id = put_file(file)
-        _process = Process(name, description, file_id, current_user.id)
+        file_type = file.filename.split('.')[1]
+        file_id = put_file(file, file.filename)
+        _process = Process(name, description, file_type, file_id, current_user.id)
         insert_process(_process)
         return redirect(url_for('process.processes'))
     flash('Поля не заполнены!')
@@ -73,11 +81,13 @@ def update_process_data(id):
         return redirect(url_for('process.get_process', id=id))
     _process = get_process_by_id(id)
     file_id = _process['file_id']
+    file_type = _process['file_type']
     if request.files.get('file', None):
         delete_file(file_id)
         file = request.files['file']
-        file_id = put_file(file)
-    new_process = Process(name, description, file_id, current_user.id)
+        file_id = put_file(file, file.filename)
+        file_type = file.filename.split('.')[1]
+    new_process = Process(name, description, file_type, file_id, current_user.id)
     update_process(id, new_process)
     return redirect(url_for('process.processes'))
 
@@ -89,12 +99,27 @@ def delete_process_data(id):
     return redirect(url_for('process.processes'))
 
 
-@process.route('/api/processes/process/download_file/<id>', methods=['GET'])
+@process.route('/api/processes/download_file/<id>', methods=['GET'])
 @login_required
 def download_file(id):
     _process = get_process_by_id(id)
-    file = get_file_database(_process['file_id'])
-    response = make_response(file)
-    _type = mimetypes.guess_type('test.xlsx')
-    response.mimetype = _type[0]
-    return response
+    if _process:
+        file = get_file(_process['file_id'])
+        response = make_response(file)
+        _type = mimetypes.guess_type('result.' + _process['file_type'])
+        response.mimetype = _type[0]
+        return response
+    return redirect(url_for('process.processes'))
+
+
+@process.route('/api/processes/process/download_file/<id>', methods=['GET'])
+@login_required
+def download_result_file(id):
+    myfile = get_myfile_by_id(id)
+    if myfile:
+        file = get_file(myfile['file_id'])
+        response = make_response(file)
+        _type = mimetypes.guess_type(myfile['filename'])
+        response.mimetype = _type[0]
+        return response
+    return redirect(url_for('process.processes'))
