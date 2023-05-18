@@ -1,4 +1,4 @@
-from flask import render_template, Blueprint, send_from_directory
+from flask import render_template, Blueprint, send_from_directory, redirect, url_for
 from flask_login import login_required
 
 main = Blueprint('main', __name__)
@@ -11,7 +11,7 @@ def api_keys_page():
 
 @main.route("/", methods=['GET'])
 def start_page():
-    return render_template("index.html")
+    return redirect(url_for('auth.login'))
 
 
 @main.route("/api", methods=['GET'])

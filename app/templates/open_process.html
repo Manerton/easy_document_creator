@@ -8,14 +8,18 @@
             {% endblock %}
         </h1>
     </div>
-    <div>{{ process.name }}</div>
+    <div class="border-bottom">{{ process.name }}</div>
+    <br/>
+    <div class="border-bottom">{{ process.description }}</div>
+    <br/>
     <form action="{% if process.file_type == "xlsx" %} {{ url_for('xlsx.file_xlsx', process_id=process.id) }} {% endif %}
                  {% if process.file_type == "docx" %} {{ url_for('docx.file_docx', process_id=process.id) }} {% endif %}"
           method="POST" enctype=multipart/form-data>
-        <div class="form-group">
+        <div class="form-group btn btn-outline-primary border-bottom">
             <label for="exampleFormControlFile1">JSON документ</label>
             <input type="file" name=file class="form-control-file">
          </div>
+         <br/>
         <button class="btn btn-primary">Выполнить</button>
     </form>
     {% if myfiles %}

@@ -28,7 +28,7 @@ def login_post():
         return redirect(url_for('auth.login'))
     user = User(find_user["name"], find_user["email"], find_user["password"], find_user["id"])
     login_user(user, remember=remember)
-    return redirect(url_for('main.start_test'))
+    return redirect(url_for('process.processes'))
 
 
 @auth.route('/signup', methods=['GET'])
