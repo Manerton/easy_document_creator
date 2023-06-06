@@ -4,14 +4,16 @@
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
         <h1>
             {% block title %}
-                Процесс
+                Процесс {{ process.name }}
             {% endblock %}
         </h1>
     </div>
-    <div class="border-bottom">{{ process.name }}</div>
-    <br/>
-    <div class="border-bottom">{{ process.description }}</div>
-    <br/>
+    <label for="exampleFormControlFile1">Описание</label>
+    <div class="card mb-3">
+        <div class="card-body">
+            <p class="card-text">{{ process.description }}</p>
+        </div>
+    </div>
     <form action="{% if process.file_type == "xlsx" %} {{ url_for('xlsx.file_xlsx', process_id=process.id) }} {% endif %}
                  {% if process.file_type == "docx" %} {{ url_for('docx.file_docx', process_id=process.id) }} {% endif %}"
           method="POST" enctype=multipart/form-data>
@@ -50,7 +52,7 @@
                         {{myfile.filename}}
                     </td>
                     <td>
-                        <a class="bi bi-trash btn btn-outline-danger" href=""></a>
+                        <a class="bi bi-trash btn btn-outline-danger" href="{{ url_for('process.delete_result_file', id=myfile.id) }}"></a>
                         <a class="bi bi-download btn btn-outline-success" href="{{ url_for('process.download_result_file', id = myfile.id) }}"></a>
                     </td>
                 </tr>
@@ -60,7 +62,7 @@
     </div>
     {% endif %}
     {% if not myfiles %}
-        <p>Файлы отсутствуют</p>
+        <hr/>
+        <div class="m-5 text-center">Файлы отсутствуют</div>
     {% endif %}
-
 {% endblock %}

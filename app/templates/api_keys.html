@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+        <h1>{% block title %} API ключи {% endblock %}</h1>
+    </div>
+    <div class="">
+        <div class="d-flex pb-3">
+            <button class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">Создать ключ</button>
+        </div>
+        {% if api_keys %}
+        <div class="table-wrapper has-mobile-cards">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th draggable="false" class="is-sortable is-unselectable" style="width: 50%;">
+                            <div class="th-wrap">
+                                <span class="is-relative">
+                                    Название
+                                </span>
+                            </div>
+                        </th>
+                        <th draggable="false" class="is-sortable is-unselectable is-current-sort">
+                            <div class="th-wrap">
+                                <span class="is-relative">
+                                    Ключ
+                                </span>
+                            </div>
+                        </th>
+                        <th draggable="false" class="is-sortable is-unselectable is-current-sort">
+                            <div class="th-wrap">
+                                <span class="is-relative">
+                                    Опции
+                                </span>
+                            </div>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for api_key in api_keys %}
+                    <tr draggable="false" class="">
+                        <td data-label="Название" class="">
+                            {{ api_key.name }}
+                        </td>
+                        <td data-label="Ключ" class="">
+                            {{ api_key.key }}
+                        </td>
+                        <td data-label="Ключ" class="">
+                            <a class="bi bi-trash btn btn-outline-danger" href="{{ url_for('api_key.delete_api_key_data', id=api_key.id) }}"></a>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+        {% if not api_keys %}
+            <div class="m-5 text-center">Ещё ни один api ключ не создан</div>
+        {% endif %}
+    </div>
+
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Создание API ключа</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form action="{{ url_for('api_key.insert_api_key_data') }}" method="POST">
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="recipient-name" class="col-form-label">Название:</label>
+                            <input type="text" name="name" class="form-control" id="recipient-name">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+                        <button type="submit" class="btn btn-primary">Создать</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

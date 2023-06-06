@@ -14,9 +14,9 @@ from app.database.process_repository import (
 )
 
 from app.database.file_repository import (
-    get_myfiles,
-    get_myfile_by_id,
-    delete_file
+    get_my_files,
+    get_my_file_by_id,
+    delete_my_file
 )
 from app.models.process import Process
 
@@ -47,9 +47,9 @@ def get_process(id=None):
 @login_required
 def open_process(id):
     _process = get_process_by_id(id)
-    myfiles = get_myfiles(_process['file_id'])
+    my_files = get_my_files(_process['id'])
     if _process:
-        return render_template('open_process.html', process=_process, myfiles=myfiles)
+        return render_template('open_process.html', process=_process, myfiles=my_files)
 
 
 @process.route('/api/processes/add', methods=['POST'])
@@ -115,11 +115,21 @@ def download_file(id):
 @process.route('/api/processes/process/download_file/<id>', methods=['GET'])
 @login_required
 def download_result_file(id):
-    myfile = get_myfile_by_id(id)
-    if myfile:
-        file = get_file(myfile['file_id'])
+    my_file = get_my_file_by_id(id)
+    if my_file:
+        file = get_file(my_file['file_id'])
         response = make_response(file)
-        _type = mimetypes.guess_type(myfile['filename'])
+        _type = mimetypes.guess_type(my_file['filename'])
         response.mimetype = _type[0]
         return response
     return redirect(url_for('process.processes'))
+
+
+@process.route('/api/processes/process/delete_file/<id>')
+@login_required
+def delete_result_file(id):
+    my_file = get_my_file_by_id(id)
+    if my_file:
+        process_id = my_file["process_id"]
+        delete_my_file(id)
+        return redirect(url_for('process.open_process', id=process_id))

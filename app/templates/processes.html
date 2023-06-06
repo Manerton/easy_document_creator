@@ -56,12 +56,9 @@
                         </a>
                         <a class="bi bi-trash btn btn-outline-danger" href="{{ url_for('process.delete_process_data', id=process.id) }}"></a>
                         <a class="bi bi-download btn btn-outline-success" href="{{ url_for('process.download_file', id=process.id) }}"></a>
-                    </td>
-                    <td>
                         <a href="{{ url_for('process.open_process', id=process.id) }}" role="button" class="bi bi-chevron-double-right btn btn-success" >
                         </a>
                     </td>
-                    <td hidden>{{ process.file_id }}></td>
 
                 </tr>
             {% endfor %}
@@ -70,7 +67,7 @@
     </div>
     {% endif %}
     {% if not _processes %}
-        <p>Ещё ни один процесс не создан</p>
+         <div class="m-5 text-center">Ещё ни один процесс не создан</div>
     {% endif %}
 {% endblock %}
 

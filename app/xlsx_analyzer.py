@@ -25,6 +25,7 @@ class XlsxAnalyzer:
                 for cell in row:
                     self.search_token(cell)
 
+    # Поиск токена в ячейке
     def search_token(self, cell: Cell):
         cell_text = cell.value
         if cell_text is None:
@@ -32,6 +33,7 @@ class XlsxAnalyzer:
         if "{{" and "}}" in cell_text:
             self.analyze_type_token(cell)
 
+    # Анализ типа токена
     def analyze_type_token(self, cell: Cell):
         for word in cell.value.split():
             if "{{" and "}}" in word:
@@ -43,11 +45,14 @@ class XlsxAnalyzer:
     def init_data(self, data):
         self.data = data
 
+    # Замена токена в тексте ячейки на значение
     def replace_str_in_cell(self, cell: Cell, full_token, new_name):
         cell.value = cell.value.replace(full_token, new_name)
 
     def replace_str(self,  key, value):
         temp_token: TokenTypeXlsx = self.tokens_xlsx.tokens_str.get(key)
+        if temp_token is None:
+            return
         token_name = temp_token.token_name
         temp_token.cell.value = temp_token.cell.value.replace(token_name, value)
 
@@ -87,12 +92,18 @@ class XlsxAnalyzer:
         temp_token_collection = collection
         if collection is None:
             temp_token_collection: TokenTypeCollection = self.tokens_xlsx.tokens_collection.get(main_token)
+
+        if temp_token_collection is None:
+            return
+
         for key in data:
             i = 1
             value = data.get(key)
             type_value = type(value)
             if type_value == str or type_value == int:
                 sub_token: TokenTypeXlsx = temp_token_collection.sub_tokens.get(key)
+                if sub_token is None:
+                    continue
                 new_cell: Cell = None
                 if be_more:
                     new_cell = self.add_line(sub_token.cell, sub_token.text_cell)
@@ -107,9 +118,13 @@ class XlsxAnalyzer:
                 temp_type = type(value[0])
                 if temp_type == dict:
                     sub_token: TokenTypeCollection = temp_token_collection.sub_tokens.get(key)
+                    if sub_token is None:
+                        continue
                     last_token = self.replace_list_dict(key, value, sub_token)
                 elif temp_type == str:
                     sub_token: TokenTypeXlsx = temp_token_collection.sub_tokens.get(key)
+                    if sub_token is None:
+                        continue
                     last_token = self.replace_list(key, value, sub_token)
         return last_token
 
@@ -120,6 +135,10 @@ class XlsxAnalyzer:
             min_glob = None
         for key in collection.sub_tokens:
             value = collection.sub_tokens.get(key)
+
+            if value is None:
+                return
+
             type_value = type(value)
             if type_value == TokenTypeXlsx:
                 if min_glob is None or min_glob < value.num_row:
@@ -133,6 +152,10 @@ class XlsxAnalyzer:
             min_row = self.min_row(collection)
         for key in collection.sub_tokens:
             value = collection.sub_tokens.get(key)
+
+            if value is None:
+                return
+
             type_value = type(value)
             if type_value == TokenTypeXlsx:
                 last_row = start_row
@@ -148,6 +171,8 @@ class XlsxAnalyzer:
                     value.merge.end_row = new_max
                     value.cell = self.active_worksheet.cell(value.merge.start_row, value.merge.start_column)
                     value.cell.value = value.text_cell
+                    value.cell.font = value.my_style.font.copy()
+                    value.cell.alignment = value.my_style.alignment.copy()
                     self.active_worksheet.merge_cells(start_row=value.merge.start_row, start_column=value.merge.start_column,
                                                       end_row=value.merge.end_row, end_column=value.merge.end_column)
                 else:
@@ -169,6 +194,10 @@ class XlsxAnalyzer:
         temp_token_collection = collection
         if collection is None:
             temp_token_collection: TokenTypeCollection = self.tokens_xlsx.tokens_collection.get(main_key)
+        # Если коллекция не найдена, то пропустить её
+        if temp_token_collection is None:
+            return
+
         last_token = None
         simple_repeat = self.all_same(list_data[0])
         for data in list_data:
@@ -188,6 +217,10 @@ class XlsxAnalyzer:
         temp_token = collection
         if collection is None:
             temp_token: TokenTypeXlsx = self.tokens_xlsx.tokens_str.get(key)
+
+        if temp_token is None:
+            return
+
         for value in data:
             new_cell = None
             if i < len(data):

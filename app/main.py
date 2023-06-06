@@ -1,8 +1,6 @@
 import os
-
 from flask import Flask
 from flask_login import LoginManager
-
 from app.models.user import User
 
 app = Flask(__name__)
@@ -18,6 +16,7 @@ login_manager.init_app(app)
 
 from app.database.user_repository import get_user_by_id
 
+
 @login_manager.user_loader
 def load_user(user_id):
     find_user = get_user_by_id(user_id)
@@ -30,6 +29,7 @@ import controller.docx_controller
 import controller.xlsx_controller
 import controller.user_controller
 import controller.process_controller
+import controller.api_key_controller
 
 
 from controller.auth_controller import auth as auth_blueprint
@@ -56,7 +56,9 @@ from controller.process_controller import process as process_blueprint
 
 app.register_blueprint(process_blueprint)
 
+from controller.api_key_controller import api_key as api_key_blueprint
 
+app.register_blueprint(api_key_blueprint)
 
 
 

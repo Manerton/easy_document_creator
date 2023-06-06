@@ -2,6 +2,7 @@ import flask_pymongo
 from bson import ObjectId
 
 from app.database.db import db, put_file_database, get_file_database, delete_file_database
+from app.database.file_repository import get_my_files, delete_my_file
 from app.models.process import Process
 
 processes_collection: flask_pymongo.wrappers.Database = db.Processes
@@ -47,6 +48,12 @@ def update_process(id, process):
 # Удаление процесса
 def delete_process(process_id: str):
     process_find = processes_collection.find_one({"_id": ObjectId(process_id)})
+    # Получаем список всех готовых файлов процесса
+    my_files = get_my_files(process_id)
+    # Удаляем все файлы
+    for file in my_files:
+        delete_my_file(file['id'])
+    # Удаляем процесс
     if process_find:
         delete_file(process_find["file_id"])
         process = processes_collection.delete_one({"_id": ObjectId(process_id)})

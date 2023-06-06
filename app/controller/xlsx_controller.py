@@ -17,7 +17,7 @@ from app.database.process_repository import (
     delete_file
 )
 
-from app.database.file_repository import ( insert_file )
+from app.database.file_repository import ( insert_my_file )
 
 
 xlsx = Blueprint('xlsx', __name__)
@@ -100,8 +100,8 @@ def file_xlsx(process_id):
         # delete_file_from_temp(os.path.join(app.config['UPLOAD_FOLDER'], result_filename))
         # delete_file_from_temp(os.path.join(app.config['UPLOAD_FOLDER'], temp_random_filename))
         # delete_file_from_temp(os.path.join(app.config['UPLOAD_FOLDER'], json_file.filename))
-        myFile = MyFile(result_filename, file_id, template_file_id)
-        insert_file(myFile)
+        myFile = MyFile(result_filename, file_id, process_id)
+        insert_my_file(myFile)
         return redirect(url_for('process.open_process', id=process_id))
 
 

@@ -13,17 +13,28 @@ class SupportMerge:
     end_row: int
 
 
+class MyStyle:
+    font: any
+    alignment: any
+
+    def __init__(self):
+        self.font = None
+        self.alignment = None
+
+
 class TokenTypeXlsx:
     token_name: str
     text_cell: str
     cell: Cell
     merge: any
     num_row: int
+    my_style: MyStyle
 
     def __init__(self):
         self.token_name = ""
         self.text_cell = ""
         self.merge = None
+        self.my_style = MyStyle()
 
 
 class TokenTypeCollection:
@@ -44,6 +55,8 @@ class TokenXlsx:
     def add_token_str(self, cell: Cell):
         temp_token = TokenTypeXlsx()
         temp_token.cell = cell
+        temp_token.my_style.font = cell.font
+        temp_token.my_style.alignment = cell.alignment
         clear_token = cell.internal_value.translate({ord(i): None for i in '{}'})
         temp_token.token_name = cell.internal_value
         self.tokens_str.update({clear_token: temp_token})
@@ -73,6 +86,8 @@ class TokenXlsx:
                 sub_token = TokenTypeXlsx()
                 sub_token.token_name = full_name
                 sub_token.cell = cell
+                sub_token.my_style.font = cell.font
+                sub_token.my_style.alignment = cell.alignment
                 sub_token.text_cell = cell.value
                 sub_token.num_row = cell.row
                 sub_token.merge = self.cell_is_merge(cell)
@@ -87,6 +102,8 @@ class TokenXlsx:
             sub_token = TokenTypeXlsx()
             sub_token.token_name = full_name
             sub_token.cell = cell
+            sub_token.my_style.font = cell.font
+            sub_token.my_style.alignment = cell.alignment
             sub_token.text_cell = cell.value
             sub_token.num_row = cell.row
             sub_token.merge = self.cell_is_merge(cell)

@@ -56,6 +56,8 @@ class DocxAnalyzer:
 
     def replace_str(self, key, value):
         temp_token: TokenTypeString = self.tokens.TokensTypeString.get(key)
+        if temp_token is None:
+            return
         temp_token.paragraph = self.replace_str_in_paragraph(temp_token.paragraph, temp_token.main_token, value, temp_token.font)
 
         # font = get_font_and_size(temp_token.paragraph.runs, key)
@@ -73,6 +75,8 @@ class DocxAnalyzer:
         copy_last_token = copy.copy(last_token)
         for token in token_collection.sub_tokens:
             value = token_collection.sub_tokens.get(token)
+            if value is None:
+                continue
             type_token = type(value)
             if type_token == TokenTypeString:
                 if (value.old_text_paragraph != copy_last_token.old_text_paragraph
@@ -95,7 +99,8 @@ class DocxAnalyzer:
             tc = tr.add_tc()
             tc.width = gridCol.w
         successor.addprevious(tr)
-        return table.rows[ix]
+        temp = table.rows[ix]
+        return temp
 
     def restoring_collection_in_table(self, token_collection: TokenTypeCollection):
         for cell in token_collection.table.last_row.cells:
@@ -105,24 +110,36 @@ class DocxAnalyzer:
         temp_token_collection = collection
         if collection is None:
             temp_token_collection: TokenTypeCollection = self.tokens.TokensTypeCollection.get(main_key)
+
+        if temp_token_collection is None:
+            return
+
         last_token = None
         for key in data:
             value = data.get(key)
             type_value = type(value)
             if type_value == str:
                 sub_token: TokenTypeString = temp_token_collection.sub_tokens.get(key)
+                if sub_token is None:
+                    continue
                 self.replace_str_in_paragraph(sub_token.paragraph, sub_token.main_token, value, sub_token.font)
                 last_token = sub_token
             elif type_value == dict:
                 sub_token: TokenTypeCollection = temp_token_collection.sub_tokens.get(key)
+                if sub_token is None:
+                    continue
                 self.replace_dict(main_key, value, sub_token)
             else:
                 temp_type = type(value[0])
                 if temp_type == dict:
                     sub_token: TokenTypeCollection = temp_token_collection.sub_tokens.get(key)
+                    if sub_token is None:
+                        continue
                     last_token = self.replace_list_dict(key, value, sub_token)
                 elif temp_type == str:
                     sub_token: TokenTypeString = temp_token_collection.sub_tokens.get(key)
+                    if sub_token is None:
+                        continue
                     last_token = self.replace_list(main_key, value, sub_token)
         return last_token
 
@@ -131,14 +148,17 @@ class DocxAnalyzer:
         temp_token_collection = collection
         if collection is None:
             temp_token_collection: TokenTypeCollection = self.tokens.TokensTypeCollection.get(main_key)
+        if temp_token_collection is None:
+            return
         last_token = None
         for data in list_data:
             if i < len(list_data):
                 be_more = True
                 if temp_token_collection.table:
                     index = temp_token_collection.table.last_row._index
-                    temp_token_collection.table.last_row = self.insert_after_row(temp_token_collection.table.table,
-                                                                                 index)
+                    temp_token_collection.table.last_row= temp_token_collection.table.table.add_row()
+                    # temp_token_collection.table.last_row = self.insert_after_row(temp_token_collection.table.table,
+                    #                                                              index)
                     for i, index in enumerate(temp_token_collection.table.old_row.cells):
                         for j, paragraph in enumerate(index.paragraphs):
                             font = get_font_and_size(paragraph.runs, paragraph.text)
@@ -228,6 +248,7 @@ class DocxAnalyzer:
     def get_level_paragraph(self, paragraph: Paragraph):
         return paragraph._p.pPr.numPr.ilvl.val
 
+    # Выставление формата параграфа
     def set_paragraph_format(self, format: Paragraph.paragraph_format, new_format: Paragraph.paragraph_format):
         format.alignment = new_format.alignment
         format.first_line_indent = new_format.first_line_indent
@@ -266,6 +287,8 @@ class DocxAnalyzer:
             temp_token: TokenTypeString = self.tokens.TokensTypeString.get(main_token)
         else:
             temp_token: TokenTypeString = collection
+        if temp_token is None:
+            return
         i = 1
         for value in values:
             new_paragraph = None

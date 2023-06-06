@@ -6,18 +6,12 @@ main = Blueprint('main', __name__)
 
 @main.route("/api-key", methods=['GET'])
 def api_keys_page():
-    return render_template("api_generate.html")
+    return render_template("api_keys.html")
 
 
 @main.route("/", methods=['GET'])
 def start_page():
     return redirect(url_for('auth.login'))
-
-
-@main.route("/api", methods=['GET'])
-@login_required
-def start_test():
-    return render_template("test.html")
 
 
 @main.route('/uploads/<name>')
