@@ -1,8 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="column is-4 is-offset-4">
-
+<div class="offset-md-3">
     <div class="box">
         {% with messages = get_flashed_messages() %}
         {% if messages %}
@@ -11,7 +10,7 @@
             </div>
         {% endif %}
         {% endwith %}
-        <div class="col-md-8 col-lg-6 col-xl-4 offset-xl-1">
+        <div class="col-md-8 col-lg-6 col-xl-5 offset-xl-1">
             <h3 class="title mb-3">Login</h3>
             <form method="POST" action="{{ url_for('auth.login') }}">
               <!-- Email input -->

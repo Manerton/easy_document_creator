@@ -16,19 +16,19 @@
     <form action="{% if not process %}{{ url_for('process.insert_process_data') }}{% endif %}
           {% if process %}{{ url_for('process.update_process_data', id=process.id) }}{% endif %}"
           method="POST" enctype=multipart/form-data>
-        <div class="form-group">
+        <div class="mb-3">
             <label for="exampleFormControlInput1">Название процесса</label>
             <input type="text" class="form-control" name="name" value="{% if process %} {{ process.name }}{% endif %}">
         </div>
-        <div class="form-group">
+        <div class="mb-3">
             <label for="exampleFormControlTextarea1">Описание процесса</label>
             <textarea name="description" class="form-control" rows="3">
                 {% if process %}{{ process.description }}{% endif %}
             </textarea>
         </div>
-        <div class="form-group">
-            <label for="exampleFormControlFile1">Шаблон документа</label>
-            <input type="file" name=file class="form-control-file">
+           <div class="mb-3">
+            <label class="form-label" for="customFile">Загрузить шаблон</label>
+            <input type="file" name=file class="form-control" id="customFile">
         </div>
         <button class="btn btn-primary">Отправить</button>
     </form>

@@ -67,7 +67,7 @@ def put_file(file, filename):
 
 # Получение файла из базы
 def get_file(id):
-    file = get_file_database(id)
+    file = get_file_database(ObjectId(id))
     return file
 
 

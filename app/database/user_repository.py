@@ -16,7 +16,7 @@ def user_helper(user) -> dict:
     }
 
 
-def check_user(email: str):
+async def check_user(email: str):
     user = users_collection.find_one({"email": email})
     if user:
         return True
@@ -37,14 +37,14 @@ def get_user_by_id(user_id: str):
     return None
 
 
-def get_user_by_email(email: str):
+async def get_user_by_email(email: str):
     user = users_collection.find_one({"email": email})
     if user:
         return user_helper(user)
     return None
 
 
-def insert_user(user_data: dict):
+async def insert_user(user_data: dict):
     users_collection.insert_one(user_data)
 
 

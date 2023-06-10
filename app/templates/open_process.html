@@ -17,11 +17,10 @@
     <form action="{% if process.file_type == "xlsx" %} {{ url_for('xlsx.file_xlsx', process_id=process.id) }} {% endif %}
                  {% if process.file_type == "docx" %} {{ url_for('docx.file_docx', process_id=process.id) }} {% endif %}"
           method="POST" enctype=multipart/form-data>
-        <div class="form-group btn btn-outline-primary border-bottom">
-            <label for="exampleFormControlFile1">JSON документ</label>
-            <input type="file" name=file class="form-control-file">
-         </div>
-         <br/>
+        <div class="mb-3">
+            <label class="form-label" for="customFile">Загрузить данные</label>
+            <input type="file" name=file class="form-control" id="customFile">
+        </div>
         <button class="btn btn-primary">Выполнить</button>
     </form>
     {% if myfiles %}

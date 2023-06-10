@@ -23,7 +23,7 @@ from app.models.process import Process
 process = Blueprint('process', __name__)
 
 
-@process.route('/api/processes', methods=['GET'])
+@process.route('/processes', methods=['GET'])
 @login_required
 def processes():
     _processes = get_processes(current_user.id)
@@ -32,8 +32,8 @@ def processes():
     return render_template('processes.html')
 
 
-@process.route('/api/processes/process', methods=['GET'])
-@process.route('/api/processes/process/<id>', methods=['GET'])
+@process.route('/processes/process', methods=['GET'])
+@process.route('/processes/process/<id>', methods=['GET'])
 @login_required
 def get_process(id=None):
     if id:
@@ -52,7 +52,7 @@ def open_process(id):
         return render_template('open_process.html', process=_process, myfiles=my_files)
 
 
-@process.route('/api/processes/add', methods=['POST'])
+@process.route('/processes/add', methods=['POST'])
 @login_required
 def insert_process_data():
     if not request.files.get('file', None):
@@ -71,7 +71,7 @@ def insert_process_data():
     return redirect(url_for('process.get_process'))
 
 
-@process.route('/api/processes/update/<id>', methods=["POST"])
+@process.route('/processes/update/<id>', methods=["POST"])
 @login_required
 def update_process_data(id):
     name = request.form.get('name')
@@ -92,14 +92,14 @@ def update_process_data(id):
     return redirect(url_for('process.processes'))
 
 
-@process.route('/api/processes/delete/<id>')
+@process.route('/processes/delete/<id>')
 @login_required
 def delete_process_data(id):
     _process = delete_process(id)
     return redirect(url_for('process.processes'))
 
 
-@process.route('/api/processes/download_file/<id>', methods=['GET'])
+@process.route('/processes/download_file/<id>', methods=['GET'])
 @login_required
 def download_file(id):
     _process = get_process_by_id(id)
@@ -112,7 +112,7 @@ def download_file(id):
     return redirect(url_for('process.processes'))
 
 
-@process.route('/api/processes/process/download_file/<id>', methods=['GET'])
+@process.route('/processes/process/download_file/<id>', methods=['GET'])
 @login_required
 def download_result_file(id):
     my_file = get_my_file_by_id(id)
@@ -125,7 +125,16 @@ def download_result_file(id):
     return redirect(url_for('process.processes'))
 
 
-@process.route('/api/processes/process/delete_file/<id>')
+@process.route('/api/processes/process/download_file/<file_id>', methods=['GET'])
+def download_result_file_api(file_id):
+    file = get_file(file_id)
+    response = make_response(file)
+    _type = mimetypes.guess_type('test.docx')
+    response.mimetype = _type[0]
+    return response
+
+
+@process.route('/processes/process/delete_file/<id>')
 @login_required
 def delete_result_file(id):
     my_file = get_my_file_by_id(id)

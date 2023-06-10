@@ -13,10 +13,12 @@ class DocxAnalyzer:
     data: any
     paragraphs_in_work = []
 
+    # Открытие шаблона документа
     def open_document(self, name_file: str):
         self.document = Document(name_file)
         self.tokens = Tokens()
 
+    # Начало поиска токенов в таблицах
     def search_token_tables(self, tables):
         for table in tables:
             for row in table.rows:
@@ -27,6 +29,7 @@ class DocxAnalyzer:
                     sup_table.old_row = copy.copy(row)
                     self.search_token_paragraph(cell.paragraphs, sup_table)
 
+    # Начало поиска токенов
     def start_search_tokens(self):
         tables = self.document.tables
         if len(tables) != 0:
@@ -34,6 +37,7 @@ class DocxAnalyzer:
         paragraphs = self.document.paragraphs
         self.search_token_paragraph(paragraphs)
 
+    # Анализ и определение типов токенов
     def analyze_token_type(self, paragraph: Paragraph, is_table=None):
         for word in paragraph.text.split():
             if "{{" and "}}" in word:
@@ -71,6 +75,7 @@ class DocxAnalyzer:
         set_font_and_size(paragraph.runs, new_name, font)
         return paragraph
 
+    # Восстановление коллекции
     def restoring_collection(self, last_token, token_collection: TokenTypeCollection):
         copy_last_token = copy.copy(last_token)
         for token in token_collection.sub_tokens:
@@ -102,10 +107,12 @@ class DocxAnalyzer:
         temp = table.rows[ix]
         return temp
 
+    # Восстановление коллекции в таблицах
     def restoring_collection_in_table(self, token_collection: TokenTypeCollection):
         for cell in token_collection.table.last_row.cells:
             self.search_token_paragraph(cell.paragraphs)
 
+    # Анализ данных типа dict для заполнения токенов
     def replace_dict(self, main_key, data, collection=None):
         temp_token_collection = collection
         if collection is None:
@@ -143,6 +150,7 @@ class DocxAnalyzer:
                     last_token = self.replace_list(main_key, value, sub_token)
         return last_token
 
+    # Анализ списка данных типа dict
     def replace_list_dict(self, main_key, list_data, collection=None):
         i = 1
         temp_token_collection = collection
@@ -156,7 +164,7 @@ class DocxAnalyzer:
                 be_more = True
                 if temp_token_collection.table:
                     index = temp_token_collection.table.last_row._index
-                    temp_token_collection.table.last_row= temp_token_collection.table.table.add_row()
+                    temp_token_collection.table.last_row = temp_token_collection.table.table.add_row()
                     # temp_token_collection.table.last_row = self.insert_after_row(temp_token_collection.table.table,
                     #                                                              index)
                     for i, index in enumerate(temp_token_collection.table.old_row.cells):
@@ -282,6 +290,7 @@ class DocxAnalyzer:
         self.list_number(new_para, paragraph, level)
         return new_para
 
+
     def replace_list(self, main_token, values, collection=None):
         if collection is None:
             temp_token: TokenTypeString = self.tokens.TokensTypeString.get(main_token)
@@ -308,6 +317,7 @@ class DocxAnalyzer:
         elif temp_type == str:
             self.replace_list(main_key, list_data)
 
+    # Запуск анализа данных и замены токенов
     def start_replace(self):
         for key in self.data:
             value = self.data.get(key)
@@ -319,5 +329,6 @@ class DocxAnalyzer:
             elif type_value == list:
                 self.analyze_type_in_list(key, value)
 
+    # Сохранение документа
     def save_file(self, new_name_file):
         self.document.save(new_name_file)

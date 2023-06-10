@@ -1,7 +1,7 @@
 def ResponseModel(data, message):
     return {
         "data": [data],
-        "code": 200,
+        "status_code": 200,
         "message": message,
     }
 
@@ -9,6 +9,6 @@ def ResponseModel(data, message):
 def ErrorResponseModel(error, code, message):
     return {
         "error": error,
-        "code": code,
+        "status_code": code,
         "message": message
     }

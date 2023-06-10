@@ -6,7 +6,7 @@
     </div>
     <div class="">
         <div class="d-flex pb-3">
-            <button class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">Создать ключ</button>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createKeyModal">Создать ключ</button>
         </div>
         {% if api_keys %}
         <div class="table-wrapper has-mobile-cards">
@@ -59,24 +59,23 @@
         {% endif %}
     </div>
 
-    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
+<!-- Modal -->
+    <div class="modal fade" id="createKeyModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel">Создание API ключа</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form action="{{ url_for('api_key.insert_api_key_data') }}" method="POST">
                     <div class="modal-body">
-                        <div class="form-group">
+                         <div class="form-group">
                             <label for="recipient-name" class="col-form-label">Название:</label>
                             <input type="text" name="name" class="form-control" id="recipient-name">
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
                         <button type="submit" class="btn btn-primary">Создать</button>
                     </div>
                 </form>

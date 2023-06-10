@@ -12,29 +12,29 @@ from app.models.api_key import ApiKey
 api_key = Blueprint('api_key', __name__)
 
 
-@api_key.route('/api/api_keys', methods=['GET'])
+@api_key.route('/api_keys', methods=['GET'])
 @login_required
-def get_api_keys_data():
-    api_keys = get_api_keys(current_user.id)
+async def get_api_keys_data():
+    api_keys = await get_api_keys(current_user.id)
     if api_keys:
         return render_template('api_keys.html', api_keys=api_keys)
     return render_template('api_keys.html')
 
 
-@api_key.route('/api/api_keys/add', methods=['POST'])
+@api_key.route('/api_keys/add', methods=['POST'])
 @login_required
-def insert_api_key_data():
+async def insert_api_key_data():
     name = request.form.get('name')
     if name:
         # Генерация случайного ключа
         key = secrets.token_urlsafe(16)
         _api_key = ApiKey(name, key, current_user.id)
-        insert_api_key(_api_key)
+        await insert_api_key(_api_key)
     return redirect(url_for('api_key.get_api_keys_data'))
 
 
-@api_key.route('/api/api_keys/delete/<id>')
+@api_key.route('/api_keys/delete/<id>')
 @login_required
-def delete_api_key_data(id):
-    delete_api_key(id)
+async def delete_api_key_data(id):
+    await delete_api_key(id)
     return redirect(url_for('api_key.get_api_keys_data'))

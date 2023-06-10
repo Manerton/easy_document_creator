@@ -18,25 +18,25 @@ def api_key_helper(api_key) -> dict:
     }
 
 
-def insert_api_key(api_key: ApiKey):
+async def insert_api_key(api_key: ApiKey):
     api_key_collection.insert_one(api_key.__dict__)
 
 
-def delete_api_key(api_key_id: str):
+async def delete_api_key(api_key_id: str):
     api_key_find = api_key_collection.find_one({"_id": ObjectId(api_key_id)})
     if api_key_find:
         api_key = api_key_collection.delete_one({"_id": ObjectId(api_key_id)})
         return api_key.raw_result
 
 
-def get_api_keys(user_id: str):
+async def get_api_keys(user_id: str):
     api_keys = []
     for api_key in api_key_collection.find({"user_id": user_id}):
         api_keys.append(api_key_helper(api_key))
     return api_keys
 
 
-def check_api_key(key):
+async def check_api_key(key):
     api_keys = []
     for api_key in api_key_collection.find():
         api_keys.append(api_key_helper(api_key))

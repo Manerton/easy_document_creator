@@ -18,11 +18,12 @@ def login():
 
 
 @auth.route('/login', methods=['POST'])
-def login_post():
+async def login_post():
     email = request.form.get('email')
     password = request.form.get('password')
     remember = True if request.form.get('remember') else False
-    find_user = get_user_by_email(email)
+    find_user = await get_user_by_email(email)
+    # Если пользователь не найден или пароль не верный, то вывести ошибку
     if not find_user or not check_password_hash(find_user['password'], password):
         flash('Логин или пароль введены не верно')
         return redirect(url_for('auth.login'))
@@ -37,16 +38,16 @@ def signup():
 
 
 @auth.route('/signup', methods=['POST'])
-def signup_post():
+async def signup_post():
     email = request.form.get('email')
-    existing_user = check_user(email)
+    existing_user = await check_user(email)
     if existing_user == False:
         name = request.form.get('name')
         password = request.form.get('password')
         if name and email and password:
             _hash_password = generate_password_hash(password)
             user = User(name, email, _hash_password)
-            new_user = insert_user(user.__dict__)
+            await insert_user(user.__dict__)
             return redirect(url_for('auth.login'))
         else:
             flash('Поле не заполнено')
