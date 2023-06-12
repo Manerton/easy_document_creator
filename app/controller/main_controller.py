@@ -24,3 +24,5 @@ def about_page():
 @main.route('/uploads/<name>')
 def download_file(name):
     return send_from_directory('../filedownloads/', name)
+
+

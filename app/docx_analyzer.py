@@ -3,7 +3,7 @@ from docx.oxml import OxmlElement
 from docx.text.paragraph import Paragraph
 import copy
 
-from HelpData import Tokens, TokenTypeString, TokenTypeCollection, SimpleParagraphData, SupportTable, get_font_and_size, \
+from token_docx import Tokens, TokenTypeString, TokenTypeCollection, SimpleParagraphData, SupportTable, get_font_and_size, \
     set_font_and_size
 
 

@@ -1,7 +1,11 @@
+import os
+
 import flask_pymongo
 from bson import ObjectId
 
 from app.database.db import db, put_file_database, get_file_database, delete_file_database
+from app.main import app
+from app.models.my_file import MyFile
 
 file_collection: flask_pymongo.wrappers.Database = db.MyFiles
 
@@ -47,6 +51,32 @@ def delete_my_file(my_file_id: str):
 
 def delete_result_file(id):
     delete_file_database(id)
+
+
+# Загружаем файл в базу
+async def save_result_file_in_db(result_filename, process_id):
+    save_file = open(os.path.join(app.config['UPLOAD_FOLDER'], result_filename), 'rb')
+    file = save_file.read()
+    file_id = put_file_database(file, filename=result_filename)
+    save_file.close()
+    my_file = MyFile(result_filename, file_id, process_id)
+    insert_my_file(my_file)
+    return file_id
+
+
+# Удаление ранее созданных файлов из папки для временных файлов
+async def delete_template_file(template_filename: str, json_filename: str, result_filename: str):
+    # Удаляем json с данными
+    delete_file_from_temp(os.path.join(app.config['UPLOAD_FOLDER'], json_filename))
+    # Удаляем шаблон документа
+    delete_file_from_temp(os.path.join(app.config['UPLOAD_FOLDER'], template_filename))
+    # Удаляем готовый полученный документ
+    delete_file_from_temp(os.path.join(app.config['UPLOAD_FOLDER'], result_filename))
+
+
+def delete_file_from_temp(path: str):
+    if os.path.isfile(path):
+        os.remove(path)
 
 
 
