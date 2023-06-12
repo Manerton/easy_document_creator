@@ -57,7 +57,7 @@ async def api_now_file_docx():
     file = save_file.read()
     save_file.close()
     await delete_template_file(list_filenames[0], list_filenames[1], list_filenames[2])
-
+    # Подготовка ответа
     response = make_response(file)
     _type = mimetypes.guess_type(list_filenames[2])
     response.mimetype = _type[0]
@@ -80,7 +80,7 @@ async def api_now_file_docx_process(process_id):
         file = save_file.read()
         save_file.close()
         await delete_template_file(list_filenames[0], list_filenames[1], list_filenames[2])
-
+        # Подготовка ответа
         response = make_response(file)
         _type = mimetypes.guess_type(list_filenames[2])
         response.mimetype = _type[0]
@@ -99,10 +99,10 @@ async def api_file_docx_process(process_id):
             return ErrorResponseModel("Error data", 400, "Invalid file type")
         list_filenames = await create_filenames_for_docx()
         file_id = await start_create_docx_with_process(process_id, json_file, list_filenames)
-
+        # Подготовка ответа
         response = Response()
         response.status_code = 202
-        response.location = request.host_url + url_for('process.download_result_file_api', file_id=file_id)
+        response.location = request.host_url + url_for('process.download_docx_result_file_api', file_id=file_id)
         return response
     return ErrorResponseModel("Error data", 400, "File not Found")
 
@@ -113,8 +113,13 @@ async def api_file_docx_process(process_id):
 async def file_docx(process_id):
     if request.files.get('file', None):
         json_file = request.files['file']
+        if not json_file.filename.endswith('.json'):
+            flash('Файл должен быть типа json!')
+            return redirect(url_for('process.open_process', id=process_id))
         list_filenames = await create_filenames_for_docx()
         await start_create_docx_with_process(process_id, json_file, list_filenames)
+    else:
+        flash('Файл не выбран!')
     return redirect(url_for('process.open_process', id=process_id))
 
 

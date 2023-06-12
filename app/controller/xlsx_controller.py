@@ -33,33 +33,6 @@ def allowed_file(filename):
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
-# @xlsx.route("/api/generate/file-xlsx", methods=['POST'])
-# def init_file_xlsx():
-#     if 'file' not in request.files:
-#         flash('Не читаемый файл')
-#         return redirect(request.url)
-#     files = request.files.getlist("file")
-#     doc = XlsxAnalyzer()
-#     save_file = "NotName"
-#     for file in files:
-#         if file.filename == '':
-#             flash('Нет выбранного файла')
-#             return redirect(request.url)
-#         if file and allowed_file(file.filename):
-#             filename = secure_filename(file.filename)
-#             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-#             if 'xlsx' in filename:
-#                 save_file = str(date.today()) + filename
-#                 doc.open_document(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-#                 doc.start_search()
-#             elif 'json' in filename:
-#                 with open(os.path.join(app.config['UPLOAD_FOLDER'], filename), encoding="utf8") as read_file:
-#                     data = json.load(read_file)
-#                     read_file.close()
-#                 doc.init_data(data)
-#     doc.start_replace()
-#     doc.save_document(os.path.join(app.config['UPLOAD_FOLDER'], save_file))
-#     return redirect(url_for('download_file', name=save_file))
 # Генерация документа сиюминутным способом со стороны стороннего сервиса через api
 @xlsx.route("/api/generate/now/file-xlsx/", methods=['POST'])
 async def api_now_file_docx():
@@ -85,7 +58,7 @@ async def api_now_file_docx():
     file = save_file.read()
     save_file.close()
     await delete_template_file(list_filenames[0], list_filenames[1], list_filenames[2])
-
+    # Подготавливаем ответ
     response = make_response(file)
     _type = mimetypes.guess_type(list_filenames[2])
     response.mimetype = _type[0]
@@ -127,10 +100,10 @@ async def api_file_xlsx_with_process(process_id):
             return ErrorResponseModel("Error data", 400, "Invalid file type")
         list_filenames = await create_filenames_for_xlsx()
         file_id = await start_create_xlsx_with_process(process_id, json_file, list_filenames)
-
+        # Подготавливаем ответ
         response = Response()
         response.status_code = 202
-        response.location = request.host_url + url_for('process.download_result_file_api', file_id=file_id)
+        response.location = request.host_url + url_for('process.download_xlsx_result_file_api', file_id=file_id)
         return response
     return ErrorResponseModel("Error data", 400, "File not Found")
 
@@ -139,8 +112,13 @@ async def api_file_xlsx_with_process(process_id):
 async def file_xlsx(process_id):
     if request.files.get('file', None):
         json_file = request.files['file']
+        if not json_file.filename.endswith('.json'):
+            flash('Файл должен быть типа json!')
+            return redirect(url_for('process.open_process', id=process_id))
         list_filenames = await create_filenames_for_xlsx()
         await start_create_xlsx_with_process(process_id, json_file, list_filenames)
+    else:
+        flash('Файл не выбран!')
     return redirect(url_for('process.open_process', id=process_id))
 
 

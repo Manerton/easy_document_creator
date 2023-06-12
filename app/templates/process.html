@@ -13,6 +13,13 @@
             {% endblock %}
         </h1>
     </div>
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+        <div class="alert alert-danger">
+            {{ messages[0] }}
+        </div>
+    {% endif %}
+    {% endwith %}
     <form action="{% if not process %}{{ url_for('process.insert_process_data') }}{% endif %}
           {% if process %}{{ url_for('process.update_process_data', id=process.id) }}{% endif %}"
           method="POST" enctype=multipart/form-data>

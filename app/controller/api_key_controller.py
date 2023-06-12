@@ -1,4 +1,4 @@
-from flask import Blueprint, request, url_for, render_template, redirect
+from flask import Blueprint, request, url_for, render_template, redirect, flash
 from flask_login import current_user, login_required
 from app.database.api_key_repository import (
     get_api_keys,
@@ -30,6 +30,8 @@ async def insert_api_key_data():
         key = secrets.token_urlsafe(16)
         _api_key = ApiKey(name, key, current_user.id)
         await insert_api_key(_api_key)
+    else:
+        flash('Поле \"Название\" не заполнено')
     return redirect(url_for('api_key.get_api_keys_data'))
 
 

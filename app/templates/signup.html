@@ -1,16 +1,16 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="column is-4 is-offset-4">
+<div class="offset-md-3">
     <div class="box">
-        {% with messages = get_flashed_messages() %}
-        {% if messages %}
-            <div class="notification is-danger">
-                {{ messages[0] }}. Перейти на <a href="{{ url_for('auth.login') }}">login</a>.
-            </div>
-        {% endif %}
-        {% endwith %}
-        <div class="col-md-8 col-lg-6 col-xl-4 offset-xl-1">
+        <div class="col-md-8 col-lg-6 col-xl-5 offset-xl-1">
+            {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                    <div class="alert alert-danger">
+                        {{ messages[0] }}
+                    </div>
+            {% endif %}
+            {% endwith %}
             <h3 class="title mb-3">Sign Up</h3>
             <form method="POST" action="{{ url_for('auth.signup') }}">
                 <!-- Email input -->

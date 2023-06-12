@@ -21,6 +21,13 @@ from app.database.file_repository import (
 from app.models.process import Process
 
 process = Blueprint('process', __name__)
+ALLOWED_EXTENSIONS = {'docx', 'xlsx'}
+
+
+def allowed_file(filename: str):
+    """ Функция проверки расширения файла """
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
 @process.route('/processes', methods=['GET'])
@@ -55,19 +62,24 @@ def open_process(id):
 @process.route('/processes/add', methods=['POST'])
 @login_required
 def insert_process_data():
+    # Проверка на то есть ли файл
     if not request.files.get('file', None):
         flash('Файл не выбран!')
         return redirect(url_for('process.get_process'))
     file = request.files['file']
+    # Проверка на тип файла
+    if not allowed_file(file.filename):
+        flash('Файл не корректен!')
+        return redirect(url_for('process.get_process'))
     name = request.form.get('name')
     description = request.form.get('description')
-    if name and description and file:
+    if name and file:
         file_type = file.filename.split('.')[1]
         file_id = put_file(file, file.filename)
         _process = Process(name, description, file_type, file_id, current_user.id)
         insert_process(_process)
         return redirect(url_for('process.processes'))
-    flash('Поля не заполнены!')
+    flash('Поле \"название\" не заполнено!')
     return redirect(url_for('process.get_process'))
 
 
@@ -76,8 +88,8 @@ def insert_process_data():
 def update_process_data(id):
     name = request.form.get('name')
     description = request.form.get('description')
-    if not name and not description:
-        flash('Поля не заполнены')
+    if not name:
+        flash('Поле \"название\" не заполнено!')
         return redirect(url_for('process.get_process', id=id))
     _process = get_process_by_id(id)
     file_id = _process['file_id']
@@ -85,6 +97,9 @@ def update_process_data(id):
     if request.files.get('file', None):
         delete_file(file_id)
         file = request.files['file']
+        if not allowed_file(file.filename):
+            flash('Файл не корректен!')
+            return redirect(url_for('process.get_process'))
         file_id = put_file(file, file.filename)
         file_type = file.filename.split('.')[1]
     new_process = Process(name, description, file_type, file_id, current_user.id)
@@ -125,11 +140,20 @@ def download_result_file(id):
     return redirect(url_for('process.processes'))
 
 
-@process.route('/api/processes/process/download_file/<file_id>', methods=['GET'])
-def download_result_file_api(file_id):
+@process.route('/api/processes/process/download_file/docx/<file_id>', methods=['GET'])
+def download_docx_result_file_api(file_id):
     file = get_file(file_id)
     response = make_response(file)
     _type = mimetypes.guess_type('test.docx')
+    response.mimetype = _type[0]
+    return response
+
+
+@process.route('/api/processes/process/download_file/xlsx/<file_id>', methods=['GET'])
+def download_xlsx_result_file_api(file_id):
+    file = get_file(file_id)
+    response = make_response(file)
+    _type = mimetypes.guess_type('test.xlsx')
     response.mimetype = _type[0]
     return response
 
