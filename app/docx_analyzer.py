@@ -3,7 +3,7 @@ from docx.oxml import OxmlElement
 from docx.text.paragraph import Paragraph
 import copy
 
-from token_docx import Tokens, TokenTypeString, TokenTypeCollection, SimpleParagraphData, SupportTable, get_font_and_size, \
+from token_docx import Tokens, TokenTypeString, TokenTypeCollection, SupportTable, get_font_and_size, \
     set_font_and_size
 
 
@@ -11,12 +11,15 @@ class DocxAnalyzer:
     document: Document
     tokens: Tokens
     data: any
-    paragraphs_in_work = []
+
+    def __init__(self):
+        self.document = None
+        self.tokens = Tokens()
+        self.data = None
 
     # Открытие шаблона документа
     def open_document(self, name_file: str):
         self.document = Document(name_file)
-        self.tokens = Tokens()
 
     # Начало поиска токенов в таблицах
     def search_token_tables(self, tables):
@@ -163,7 +166,7 @@ class DocxAnalyzer:
             if i < len(list_data):
                 be_more = True
                 if temp_token_collection.table:
-                    index = temp_token_collection.table.last_row._index
+                    # index = temp_token_collection.table.last_row._index
                     temp_token_collection.table.last_row = temp_token_collection.table.table.add_row()
                     # temp_token_collection.table.last_row = self.insert_after_row(temp_token_collection.table.table,
                     #                                                              index)

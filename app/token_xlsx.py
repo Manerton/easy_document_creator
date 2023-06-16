@@ -12,6 +12,12 @@ class SupportMerge:
     end_column: int
     end_row: int
 
+    def __init__(self):
+        self.start_column = -1
+        self.start_row = -1
+        self.end_row = -1
+        self.end_column = -1
+
 
 class MyStyle:
     font: any
@@ -51,6 +57,10 @@ class TokenTypeCollection:
 class TokenXlsx:
     tokens_str = {}
     tokens_collection = {}
+
+    def __init__(self):
+        self.tokens_str = {}
+        self.tokens_collection = {}
 
     def add_token_str(self, cell: Cell):
         temp_token = TokenTypeXlsx()

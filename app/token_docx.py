@@ -59,16 +59,15 @@ def set_font_and_size(runs, word, font):
             run.font.size = font.size
 
 
-class SimpleParagraphData:
-    text: str
-    runs: any
-    sub_tokens = []
-
-
 class Tokens:
     TokensTypeString = {}
     TokensTypeCollection = {}
     TokensTypeList = {}
+
+    def __init__(self):
+        self.TokensTypeString = {}
+        self.TokensTypeCollection = {}
+        self.TokensTypeList = {}
 
     def add_token_type_list(self, main_token, paragraph):
         temp_token = TokenTypeString()

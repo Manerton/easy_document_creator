@@ -12,10 +12,13 @@ class XlsxAnalyzer:
     data: any
     used_cell: list
 
-    def open_document(self, name_doc: str):
-        self.document = load_workbook(name_doc)
+    def __init__(self):
+        self.document = None
         self.tokens_xlsx = TokenXlsx()
         self.used_cell = []
+
+    def open_document(self, name_doc: str):
+        self.document = load_workbook(name_doc)
 
     def start_search(self):
         worksheets = self.document.worksheets

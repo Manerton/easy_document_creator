@@ -64,12 +64,12 @@ def open_process(id):
 def insert_process_data():
     # Проверка на то есть ли файл
     if not request.files.get('file', None):
-        flash('Файл не выбран!')
+        flash('Шаблон не выбран!')
         return redirect(url_for('process.get_process'))
     file = request.files['file']
     # Проверка на тип файла
     if not allowed_file(file.filename):
-        flash('Файл не корректен!')
+        flash('Не поддерживаемый формат файла!')
         return redirect(url_for('process.get_process'))
     name = request.form.get('name')
     description = request.form.get('description')
