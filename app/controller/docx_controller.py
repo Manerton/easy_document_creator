@@ -39,7 +39,7 @@ async def api_now_file_docx():
     if api_key is None or not await check_api_key(api_key):
         return ErrorResponseModel("Error api-key", 400, "Invalid api-key")
     if not request.files.get('file', None):
-        return ErrorResponseModel("Error data", 400, "Files not Found")
+        return ErrorResponseModel("Error __data", 400, "Files not Found")
     list_filenames = await create_filenames_for_docx()
     files = request.files.getlist("file")
     for file in files:
@@ -50,7 +50,7 @@ async def api_now_file_docx():
             elif filename.endswith('.json'):
                 file.save(os.path.join(app.config['UPLOAD_FOLDER'], list_filenames[1]))
         else:
-            return ErrorResponseModel('Error data', 400, 'Invalid file type')
+            return ErrorResponseModel('Error __data', 400, 'Invalid file type')
     await docx_worker(list_filenames[0], list_filenames[1], list_filenames[2])
     # Открытие сохранённого готового файла
     save_file = open(os.path.join(app.config['UPLOAD_FOLDER'], list_filenames[2]), 'rb')
@@ -72,7 +72,7 @@ async def api_now_file_docx_process(process_id):
     if request.files.get('file', None):
         json_file = request.files['file']
         if not json_file.filename.endswith('.json'):
-            return ErrorResponseModel("Error data", 400, "Invalid file type")
+            return ErrorResponseModel("Error __data", 400, "Invalid file type")
         list_filenames = await create_filenames_for_docx()
         await start_create_docx_with_process(process_id, json_file, list_filenames, True)
         # Открытие сохранённого готового файла
@@ -96,7 +96,7 @@ async def api_file_docx_process(process_id):
     if request.files.get('file', None):
         json_file = request.files['file']
         if not json_file.filename.endswith('.json'):
-            return ErrorResponseModel("Error data", 400, "Invalid file type")
+            return ErrorResponseModel("Error __data", 400, "Invalid file type")
         list_filenames = await create_filenames_for_docx()
         file_id = await start_create_docx_with_process(process_id, json_file, list_filenames)
         # Подготовка ответа
@@ -104,7 +104,7 @@ async def api_file_docx_process(process_id):
         response.status_code = 202
         response.location = request.host_url + url_for('process.download_docx_result_file_api', file_id=file_id)
         return response
-    return ErrorResponseModel("Error data", 400, "File not Found")
+    return ErrorResponseModel("Error __data", 400, "File not Found")
 
 
 # Генерация документа со стороны web-приложения

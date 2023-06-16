@@ -121,6 +121,7 @@ class Tokens:
             sub_token.format = paragraph.paragraph_format
             temp_token.sub_tokens.update({clear_token_list[1]: sub_token})
             if parent is not None:
+                temp_token.parent = parent
                 parent.sub_tokens.update({clear_token_list[0]: temp_token})
             else:
                 self.TokensTypeCollection.update({clear_token_list[0]: temp_token})

@@ -40,6 +40,7 @@ class TokenTypeXlsx:
         self.token_name = ""
         self.text_cell = ""
         self.merge = None
+        self.num_row = -1
         self.my_style = MyStyle()
 
 
@@ -119,6 +120,7 @@ class TokenXlsx:
             sub_token.merge = self.cell_is_merge(cell)
             temp_token.sub_tokens.update({clear_token_list[1]: sub_token})
             if parent is not None:
+                temp_token.parent = parent
                 parent.sub_tokens.update({clear_token_list[0]: temp_token})
             else:
                 self.tokens_collection.update({clear_token_list[0]: temp_token})

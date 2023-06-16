@@ -27,7 +27,7 @@ def users():
 def get_user(id):
     _user = get_user_by_id(id)
     if _user:
-        return ResponseModel(_user, "User data was returned successfully")
+        return ResponseModel(_user, "User __data was returned successfully")
     return ErrorResponseModel("An error occurred.", 404, "User doesn't exist.")
 
 
@@ -45,7 +45,7 @@ def update_user_data(id):
     user_is_updated = update_user(id, _user.__dict__)
     if user_is_updated:
         return ResponseModel(
-            "Student with ID: {} name update is successful".format(id), "User data was returned successfully"
+            "Student with ID: {} name update is successful".format(id), "User __data was returned successfully"
         )
     return ErrorResponseModel(
         "An error occurred", 404, "User with id {0} doesn't exist".format(id)
