@@ -116,7 +116,7 @@ class DocxAnalyzer:
             self.__search_token_paragraph(cell.paragraphs)
 
     # Анализ данных типа dict для заполнения токенов
-    def __replace_dict(self, main_key, data, collection=None, be_more=False):
+    def __replace_dict(self, main_key: str, data, collection=None, be_more=False):
         temp_token_collection = collection
         if collection is None:
             temp_token_collection: TokenTypeCollection = self.__tokens.TokensTypeCollection.get(main_key)

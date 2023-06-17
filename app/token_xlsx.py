@@ -22,10 +22,12 @@ class SupportMerge:
 class MyStyle:
     font: any
     alignment: any
+    fill: any
 
     def __init__(self):
         self.font = None
         self.alignment = None
+        self.fill = None
 
 
 class TokenTypeXlsx:
@@ -68,6 +70,7 @@ class TokenXlsx:
         temp_token.cell = cell
         temp_token.my_style.font = cell.font
         temp_token.my_style.alignment = cell.alignment
+        temp_token.my_style.fill = cell.fill
         clear_token = cell.internal_value.translate({ord(i): None for i in '{}'})
         temp_token.token_name = cell.internal_value
         self.tokens_str.update({clear_token: temp_token})
@@ -99,6 +102,7 @@ class TokenXlsx:
                 sub_token.cell = cell
                 sub_token.my_style.font = cell.font
                 sub_token.my_style.alignment = cell.alignment
+                sub_token.my_style.fill = cell.fill
                 sub_token.text_cell = cell.value
                 sub_token.num_row = cell.row
                 sub_token.merge = self.cell_is_merge(cell)
@@ -115,6 +119,7 @@ class TokenXlsx:
             sub_token.cell = cell
             sub_token.my_style.font = cell.font
             sub_token.my_style.alignment = cell.alignment
+            sub_token.my_style.fill = cell.fill
             sub_token.text_cell = cell.value
             sub_token.num_row = cell.row
             sub_token.merge = self.cell_is_merge(cell)

@@ -65,16 +65,32 @@ class XlsxAnalyzer:
                 return False
         return True
 
-
-    # !!!!!!!!Если ячейка merge что будет?
-    def __add_line(self, cell: Cell, text):
-        # Если строка ранее не добавлялась, то добавить
-        if self.__isCellNotUsed(cell.row):
-            self.__used_cell.append(cell.row)
-            self.active_worksheet.insert_rows(cell.row+1)
-        new_cell = self.active_worksheet.cell(cell.row+1, cell.column)
-        new_cell.value = text
-        return new_cell
+    def __add_line(self, value):
+        if value.merge:
+            last_row = value.merge.end_row + 1
+            new_min = last_row
+            for i in range(value.merge.end_row - value.merge.start_row):
+                last_row = self.__add_line_after_row(last_row)
+            new_max = last_row
+            value.merge.start_row = new_min
+            value.merge.end_row = new_max
+            cell = self.active_worksheet.cell(value.merge.start_row, value.merge.start_column)
+            cell.value = value.text_cell
+            cell.font = value.my_style.font.copy()
+            cell.alignment = value.my_style.alignment.copy()
+            cell.fill = value.my_style.fill.copy()
+            self.active_worksheet.merge_cells(start_row=value.merge.start_row, start_column=value.merge.start_column,
+                                              end_row=value.merge.end_row, end_column=value.merge.end_column)
+        else:
+            if self.__isCellNotUsed(value.cell.row):
+                self.__used_cell.append(value.cell.row)
+                self.active_worksheet.insert_rows(value.cell.row + 1)
+            cell = self.active_worksheet.cell(value.cell.row + 1, value.cell.column)
+            cell.value = value.text_cell
+            cell.font = value.my_style.font.copy()
+            cell.alignment = value.my_style.alignment.copy()
+            cell.fill = value.my_style.fill.copy()
+        return cell
 
     def __add_line_after_row(self, num_row):
         if self.__isCellNotUsed(num_row):
@@ -111,7 +127,8 @@ class XlsxAnalyzer:
                     continue
                 new_cell: Cell = None
                 if be_more:
-                    new_cell = self.__add_line(sub_token.cell, sub_token.text_cell)
+                    # new_cell = self.__add_line(sub_token.cell, sub_token.text_cell)
+                    new_cell = self.__add_line(sub_token)
                 self.__replace_str_in_cell(sub_token.cell, sub_token.token_name, str(value))
                 if new_cell is not None:
                     sub_token.cell = new_cell
@@ -178,11 +195,15 @@ class XlsxAnalyzer:
                     value.cell.value = value.text_cell
                     value.cell.font = value.my_style.font.copy()
                     value.cell.alignment = value.my_style.alignment.copy()
+                    value.cell.fill = value.my_style.fill.copy()
                     self.active_worksheet.merge_cells(start_row=value.merge.start_row, start_column=value.merge.start_column,
                                                       end_row=value.merge.end_row, end_column=value.merge.end_column)
                 else:
                     value.cell = self.active_worksheet.cell(last_row, value.cell.column)
                     value.cell.value = value.text_cell
+                    value.cell.font = value.my_style.font.copy()
+                    value.cell.alignment = value.my_style.alignment.copy()
+                    value.cell.fill = value.my_style.fill.copy()
             else:
                 self.__restoring_collection(value, start_row, min_row)
 
@@ -195,7 +216,7 @@ class XlsxAnalyzer:
         return True
 
     def __replace_list_dict(self, main_key, list_data, collection=None):
-        i = 1
+
         temp_token_collection = collection
         if collection is None:
             temp_token_collection: TokenTypeCollection = self.__tokens_xlsx.tokens_collection.get(main_key)
@@ -205,20 +226,27 @@ class XlsxAnalyzer:
 
         last_token = None
         simple_repeat = self.__all_same(list_data[0])
+        index = int(1)
         for data in list_data:
-            if simple_repeat and i < len(list_data):
+            if simple_repeat and index < len(list_data):
                 be_more = True
             else:
                 be_more = False
             last_token = self.__replace_dict(main_key, data, temp_token_collection, be_more)
-            if not simple_repeat and i < len(list_data):
-                last_row = self.__add_line_after_row(last_token.cell.row)
+            if not simple_repeat and index < len(list_data):
+                if last_token.merge:
+                    last_row = last_token.cell.row
+                    for i in range(last_token.merge.end_row - last_token.merge.start_row):
+                        last_row = self.__add_line_after_row(last_row)
+                    last_row = self.__add_line_after_row(last_row)
+                else:
+                    last_row = self.__add_line_after_row(last_token.cell.row)
                 self.__restoring_collection(temp_token_collection, last_row)
-            i = i + 1
+            index += 1
         return last_token
 
     def __replace_list(self, key, data, collection=None):
-        i = 1
+        i = int(1)
         temp_token = collection
         if collection is None:
             temp_token: TokenTypeXlsx = self.__tokens_xlsx.tokens_str.get(key)
@@ -230,7 +258,8 @@ class XlsxAnalyzer:
             new_cell = None
             if i < len(data):
                 i = i+1
-                new_cell = self.__add_line(temp_token.cell, temp_token.text_cell)
+                # new_cell = self.__add_line(temp_token.cell, temp_token.text_cell)
+                new_cell = self.__add_line(temp_token)
             temp_token.cell.value = temp_token.cell.value.replace(temp_token.token_name, value)
             if new_cell:
                 temp_token.cell = new_cell
