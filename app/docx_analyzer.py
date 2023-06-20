@@ -1,5 +1,10 @@
+import re
+
 from docx import Document
 from docx.oxml import OxmlElement
+from docx.oxml.ns import qn
+from docx.table import Table, _Row
+from docx.text.font import Font
 from docx.text.paragraph import Paragraph
 import copy
 
@@ -28,8 +33,8 @@ class DocxAnalyzer:
                 for cell in row.cells:
                     sup_table = SupportTable()
                     sup_table.table = table
-                    sup_table.last_row = row
-                    sup_table.old_row = copy.copy(row)
+                    sup_table.row = row
+                    sup_table.old_cells = copy.deepcopy(row.cells)
                     self.__search_token_paragraph(cell.paragraphs, sup_table)
 
     # Начало поиска токенов
@@ -44,15 +49,17 @@ class DocxAnalyzer:
     def __analyze_token_type(self, paragraph: Paragraph, is_table=None):
         for word in paragraph.text.split():
             if "{{" and "}}" in word:
-                if "." in word:
-                    self.__tokens.add_token_type_collection(word, word, paragraph, is_table)
+                token = re.search('{{(.+?)}}', word).group(0)
+                if "." in token:
+                    self.__tokens.add_token_type_collection(token, token, paragraph, is_table)
                 else:
                     style = paragraph.style.name
                     if 'List' in style:
-                        self.__tokens.add_token_type_list(word, paragraph)
+                        self.__tokens.add_token_type_list(token, paragraph)
                     else:
-                        self.__tokens.add_token_type_string(word, paragraph)
+                        self.__tokens.add_token_type_string(token, paragraph)
 
+    # Поиск токенов в параграфе
     def __search_token_paragraph(self, paragraphs, table=None):
         for paragraph in paragraphs:
             if "{{" and "}}" in paragraph.text:
@@ -61,18 +68,17 @@ class DocxAnalyzer:
     def init_data(self, data):
         self.__data = data
 
+    # Анализ данных типа строка
     def __replace_str(self, key, value):
         temp_token: TokenTypeString = self.__tokens.TokensTypeString.get(key)
         if temp_token is None:
             return
-        temp_token.paragraph = self.__replace_str_in_paragraph(temp_token.paragraph, temp_token.main_token, value, temp_token.font)
+        temp_token.paragraph = self.__replace_str_in_paragraph(temp_token.paragraph, temp_token.main_token, value,
+                                                               temp_token.font)
 
-        # font = get_font_and_size(temp_token.paragraph.runs, key)
-        # temp_token.paragraph.text = temp_token.paragraph.text.replace(temp_token.main_token, value)
-        # set_font_and_size(temp_token.paragraph.runs, value, font)
-
-    def __replace_str_in_paragraph(self, paragraph, token, new_name, font):
-        clear_token = token.translate({ord(i): None for i in '{}'})
+    # Замена текста на новый в параграфе
+    def __replace_str_in_paragraph(self, paragraph, token: str, new_name: str, font: Font):
+        # clear_token = token.translate({ord(i): None for i in '{}'})
         # font = get_font_and_size(paragraph.runs, clear_token)
         paragraph.text = paragraph.text.replace(token, new_name)
         set_font_and_size(paragraph.runs, new_name, font)
@@ -89,16 +95,18 @@ class DocxAnalyzer:
             if type_token == TokenTypeString:
                 if (value.old_text_paragraph != copy_last_token.old_text_paragraph
                         or (value.old_text_paragraph == last_token.old_text_paragraph and last_token != value)
-                        or (value.old_text_paragraph == last_token.old_text_paragraph and copy_last_token.main_token == value.main_token)):
+                        or (
+                                value.old_text_paragraph == last_token.old_text_paragraph and copy_last_token.main_token == value.main_token)):
                     copy_last_token.paragraph = self.__insert_paragraph_after(copy_last_token.paragraph,
-                                                                            value.old_text_paragraph, value.paragraph,
-                                                                            value.font, value.format)
+                                                                              value.old_text_paragraph, value.paragraph,
+                                                                              value.font, value.format)
                     copy_last_token.main_token = value.main_token
                     copy_last_token.old_text_paragraph = copy_last_token.paragraph.text
                 value.paragraph = copy_last_token.paragraph
             else:
                 self.__restoring_collection(copy_last_token, value)
 
+    # Вставка новой строки в таблицу
     def __insert_after_row(self, table, ix):
         tbl = table._tbl
         successor = tbl.tr_lst[ix]
@@ -111,12 +119,51 @@ class DocxAnalyzer:
         return temp
 
     # Восстановление коллекции в таблицах
-    def __restoring_collection_in_table(self, token_collection: TokenTypeCollection):
-        for cell in token_collection.table.last_row.cells:
+    def __update_collection_in_table(self, token_collection: TokenTypeCollection):
+        for cell in token_collection.table.row.cells:
             self.__search_token_paragraph(cell.paragraphs)
+        for token in token_collection.sub_tokens:
+            value = token_collection.sub_tokens.get(token)
+            if value is None:
+                continue
+            type_token = type(value)
+            if type_token == TokenTypeString:
+                continue
+            else:
+                self.__update_collection_in_table(value)
+
+    # Выставление цвета заливки ячейки в таблице
+    def __set_cell_bg_color(self, parent_cell, child_cell):
+        pattern = re.compile('w:fill=\"(\S*)\"')
+        match = pattern.search(parent_cell._tc.xml)
+        if match is not None:
+            result = match.group(1)
+            tcPr = child_cell._tc.get_or_add_tcPr()
+            shd = OxmlElement("w:shd")
+            shd.set(qn("w:fill"), result)
+            tcPr.append(shd)
+
+    # Создание новой строки в таблице
+    def __create_new_row(self, cells, table: Table, height: int):
+        new_row: _Row = table.add_row()
+        new_row.height = height
+        for i, index in enumerate(cells):
+            for j, paragraph in enumerate(index.paragraphs):
+                font = get_font_and_size(paragraph.runs, paragraph.text)
+                new_row.cells[i].paragraphs[j].text = paragraph.text
+                new_row.cells[i].paragraphs[j].style = paragraph.style
+
+                new_row.cells[i].vertical_alignment = cells[i].vertical_alignment
+                self.__set_cell_bg_color(cells[i], new_row.cells[i])
+
+                set_font_and_size(new_row.cells[i].paragraphs[j].runs,
+                                  paragraph.text, font)
+                self.__set_paragraph_format(new_row.cells[i].paragraphs[j].
+                                            paragraph_format, paragraph.paragraph_format)
+        return new_row
 
     # Анализ данных типа dict для заполнения токенов
-    def __replace_dict(self, main_key: str, data, collection=None, be_more=False):
+    def __replace_dict(self, main_key: str, data, collection=None):
         temp_token_collection = collection
         if collection is None:
             temp_token_collection: TokenTypeCollection = self.__tokens.TokensTypeCollection.get(main_key)
@@ -161,8 +208,22 @@ class DocxAnalyzer:
                 return False
         return True
 
+    def __restoring_collection_in_table(self, token_collection: TokenTypeCollection):
+        token_collection.table.row = self.__create_new_row(token_collection.table.old_cells,
+                                                           token_collection.table.table,
+                                                           token_collection.table.row.height)
+        for token in token_collection.sub_tokens:
+            value = token_collection.sub_tokens.get(token)
+            if value is None:
+                continue
+            type_token = type(value)
+            if type_token == TokenTypeString:
+                continue
+            else:
+                self.__restoring_collection_in_table(value)
+
     # Анализ списка данных типа dict
-    def __replace_list_dict(self, main_key, list_data, collection=None):
+    def __replace_list_dict(self, main_key: str, list_data: list, collection=None):
         i = 1
         temp_token_collection = collection
         if collection is None:
@@ -174,33 +235,20 @@ class DocxAnalyzer:
         last_token = None
         simple_repeat = self.__all_same(list_data[0])
         for data in list_data:
-            if simple_repeat and i < len(list_data):
-                be_more = True
-            else:
-                be_more = False
             if i < len(list_data):
                 be_more = True
-                if temp_token_collection.table:
-                    # index = temp_token_collection.table.last_row._index
-                    temp_token_collection.table.last_row = temp_token_collection.table.table.add_row()
-                    # temp_token_collection.table.last_row = self.insert_after_row(temp_token_collection.table.table,
-                    #                                                              index)
-                    for i, index in enumerate(temp_token_collection.table.old_row.cells):
-                        for j, paragraph in enumerate(index.paragraphs):
-                            font = get_font_and_size(paragraph.runs, paragraph.text)
-                            temp_token_collection.table.last_row.cells[i].paragraphs[j].text = paragraph.text
-                            temp_token_collection.table.last_row.cells[i].paragraphs[j].style = paragraph.style
-                            set_font_and_size(temp_token_collection.table.last_row.cells[i].paragraphs[j].runs,
-                                              paragraph.text, font)
-                            self.__set_paragraph_format(temp_token_collection.table.last_row.cells[i].paragraphs[j].
-                                                        paragraph_format, paragraph.paragraph_format)
-            # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                if simple_repeat and temp_token_collection.table:
+                    temp_token_collection.table.row = self.__create_new_row(temp_token_collection.table.row.cells,
+                                                                            temp_token_collection.table.table,
+                                                                            temp_token_collection.table.row.height)
             else:
                 be_more = False
-            last_token = self.__replace_dict(main_key, data, temp_token_collection, be_more)
-            if be_more and collection is None and temp_token_collection.table:
+            last_token = self.__replace_dict(main_key, data, temp_token_collection)
+            if temp_token_collection.table and not simple_repeat and i < len(list_data):
                 self.__restoring_collection_in_table(temp_token_collection)
-            elif be_more and last_token is not None:
+            if be_more and temp_token_collection.table:
+                self.__update_collection_in_table(temp_token_collection)
+            elif be_more and last_token is not None and temp_token_collection.table is None:
                 self.__restoring_collection(last_token, temp_token_collection)
             i = i + 1
         return last_token
@@ -304,8 +352,8 @@ class DocxAnalyzer:
         if text:
             new_para.add_run(text)
         if repeat_paragraph:
-            set_font_and_size(new_para.runs, text, font)
             new_para.style = repeat_paragraph.style
+            set_font_and_size(new_para.runs, text, font)
             level = self.__get_level_paragraph(repeat_paragraph)
         if format:
             self.__set_paragraph_format(new_para.paragraph_format, format)
@@ -324,7 +372,7 @@ class DocxAnalyzer:
             new_paragraph = None
             if i < len(values):
                 new_paragraph = self.__insert_paragraph_after(temp_token.paragraph, temp_token.paragraph.text,
-                                                            temp_token.paragraph, temp_token.font, temp_token.format)
+                                                              temp_token.paragraph, temp_token.font, temp_token.format)
             self.__replace_str_in_paragraph(temp_token.paragraph, temp_token.main_token, value, temp_token.font)
             if new_paragraph is not None:
                 temp_token.paragraph = new_paragraph

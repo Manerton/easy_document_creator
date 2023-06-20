@@ -1,3 +1,5 @@
+import re
+
 from openpyxl import workbook, load_workbook
 from openpyxl.cell import Cell
 from openpyxl.worksheet import worksheet
@@ -40,8 +42,9 @@ class XlsxAnalyzer:
     def __analyze_type_token(self, cell: Cell):
         for word in cell.value.split():
             if "{{" and "}}" in word:
-                if "." in word:
-                    self.__tokens_xlsx.add_token_type_collection(word, word, cell)
+                token = re.search('{{(.+?)}}', word).group(0)
+                if "." in token:
+                    self.__tokens_xlsx.add_token_type_collection(token, token, cell)
                 else:
                     self.__tokens_xlsx.add_token_str(cell)
 
