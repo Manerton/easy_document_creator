@@ -3,9 +3,9 @@ import os
 import flask_pymongo
 from bson import ObjectId
 
-from app.database.db import db, put_file_database, get_file_database, delete_file_database
-from app.main import app
-from app.models.my_file import MyFile
+from modul_app.database.db import db, put_file_database, get_file_database, delete_file_database
+from modul_app.main import app
+from modul_app.models.my_file import MyFile
 
 file_collection: flask_pymongo.wrappers.Database = db.MyFiles
 

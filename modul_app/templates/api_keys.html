@@ -20,7 +20,7 @@
             <table class="table">
                 <thead>
                     <tr>
-                        <th draggable="false" class="is-sortable is-unselectable" style="width: 50%;">
+                        <th draggable="false" class="is-sortable is-unselectable" >
                             <div class="th-wrap">
                                 <span class="is-relative">
                                     Название
@@ -52,7 +52,10 @@
                         <td data-label="Ключ" class="">
                             {{ api_key.key }}
                         </td>
-                        <td data-label="Ключ" class="">
+                        <td data-label="Ключ" class="d-flex">
+                            <button onclick="copy('{{ api_key.key }}', '#copy_button_{{ api_key.id }}')"
+                                    id="copy_button_{{ api_key.id }}" class="d-flex align-items-center btn btn-outline-primary me-1 btn-15 copy-button">Copy
+                            </button>
                             <a class="bi bi-trash btn btn-outline-danger" href="{{ url_for('api_key.delete_api_key_data', id=api_key.id) }}"></a>
                         </td>
                     </tr>
@@ -89,4 +92,26 @@
             </div>
         </div>
     </div>
+
+    <script>
+        document.querySelectorAll('[data-bs-toggle="tooltip"]')
+          .forEach(tooltip => {
+            new bootstrap.Tooltip(tooltip)
+          })
+    </script>
+    <script>
+    function copy(text, target) {
+        setTimeout(function () {
+        $('#copied_tip').remove();
+        }, 500);
+        $(target).append("<div class='tip' id='copied_tip'><i class='ms-1 bi bi-clipboard-check'></i></div>");
+        var input = document.createElement('input');
+        input.setAttribute('value', text);
+        document.body.appendChild(input);
+        input.select();
+        var result = document.execCommand('copy');
+        document.body.removeChild(input)
+        return result;
+    }
+    </script>
 {% endblock %}

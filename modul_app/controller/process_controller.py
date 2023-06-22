@@ -2,7 +2,7 @@ import mimetypes
 
 from flask import Blueprint, request, flash, redirect, url_for, render_template, make_response
 from flask_login import login_required, current_user
-from app.database.process_repository import (
+from modul_app.database.process_repository import (
     get_processes,
     get_process_by_id,
     insert_process,
@@ -13,12 +13,12 @@ from app.database.process_repository import (
     delete_file
 )
 
-from app.database.file_repository import (
+from modul_app.database.file_repository import (
     get_my_files,
     get_my_file_by_id,
     delete_my_file
 )
-from app.models.process import Process
+from modul_app.models.process import Process
 
 process = Blueprint('process', __name__)
 ALLOWED_EXTENSIONS = {'docx', 'xlsx'}
@@ -50,7 +50,7 @@ def get_process(id=None):
     return render_template('process.html')
 
 
-@process.route('/api/processes/open_process/<id>', methods=['GET'])
+@process.route('/processes/open_process/<id>', methods=['GET'])
 @login_required
 def open_process(id):
     _process = get_process_by_id(id)

@@ -3,8 +3,8 @@ import hashlib
 import flask_pymongo
 from bson import ObjectId
 
-from app.database.db import db
-from app.models.api_key import ApiKey
+from modul_app.database.db import db
+from modul_app.models.api_key import ApiKey
 
 api_key_collection: flask_pymongo.wrappers.Database = db.ApiKey
 

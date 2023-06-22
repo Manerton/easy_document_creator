@@ -6,20 +6,20 @@ import uuid
 from flask import request, flash, redirect, url_for, Blueprint, make_response, Response
 from werkzeug.utils import secure_filename
 
-from app.database.api_key_repository import check_api_key
-from app.models.ResponseModel import ErrorResponseModel
-from app.models.my_file import MyFile
-from app.xlsx_analyzer import XlsxAnalyzer
-from app.main import app
+from modul_app.database.api_key_repository import check_api_key
+from modul_app.models.ResponseModel import ErrorResponseModel
+from modul_app.models.my_file import MyFile
+from modul_app.xlsx_analyzer import XlsxAnalyzer
+from modul_app.main import app
 
-from app.database.process_repository import (
+from modul_app.database.process_repository import (
     get_process_by_id,
     put_file,
     get_file,
     delete_file
 )
 
-from app.database.file_repository import (insert_my_file, save_result_file_in_db, delete_template_file)
+from modul_app.database.file_repository import (insert_my_file, save_result_file_in_db, delete_template_file)
 
 
 xlsx = Blueprint('xlsx', __name__)
@@ -46,7 +46,7 @@ async def api_now_file_docx():
     for file in files:
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
-            if filename.endswith('.docx'):
+            if filename.endswith('.xlsx'):
                 file.save(os.path.join(app.config['UPLOAD_FOLDER'], list_filenames[0]))
             elif filename.endswith('.json'):
                 file.save(os.path.join(app.config['UPLOAD_FOLDER'], list_filenames[1]))

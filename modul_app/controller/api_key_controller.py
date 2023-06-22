@@ -1,13 +1,13 @@
 from flask import Blueprint, request, url_for, render_template, redirect, flash
 from flask_login import current_user, login_required
-from app.database.api_key_repository import (
+from modul_app.database.api_key_repository import (
     get_api_keys,
     insert_api_key,
     delete_api_key
 )
 import secrets
 
-from app.models.api_key import ApiKey
+from modul_app.models.api_key import ApiKey
 
 api_key = Blueprint('api_key', __name__)
 

@@ -1,9 +1,9 @@
 import flask_pymongo
 from bson import ObjectId
 
-from app.database.db import db, put_file_database, get_file_database, delete_file_database
-from app.database.file_repository import get_my_files, delete_my_file
-from app.models.process import Process
+from modul_app.database.db import db, put_file_database, get_file_database, delete_file_database
+from modul_app.database.file_repository import get_my_files, delete_my_file
+from modul_app.models.process import Process
 
 processes_collection: flask_pymongo.wrappers.Database = db.Processes
 

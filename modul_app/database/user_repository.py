@@ -2,7 +2,7 @@ import flask_pymongo.wrappers
 from bson.objectid import ObjectId
 from flask.json import dumps
 
-from app.database.db import db
+from modul_app.database.db import db
 
 users_collection: flask_pymongo.wrappers.Database = db.Users
 

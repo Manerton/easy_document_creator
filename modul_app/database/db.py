@@ -2,7 +2,7 @@ from bson import ObjectId
 from flask_pymongo import PyMongo
 from gridfs import GridFS
 
-from app.main import app
+from modul_app.main import app
 
 
 app.config['MONGO_URI'] = "mongodb://localhost:27017/EDCDB"

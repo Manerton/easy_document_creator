@@ -3,24 +3,24 @@ import uuid
 
 from flask_login import login_required
 
-from app.database.api_key_repository import check_api_key
-from app.main import app
+from modul_app.database.api_key_repository import check_api_key
+from modul_app.main import app
 from flask import request, flash, redirect, url_for, render_template, Blueprint, make_response, Response
-from app.docx_analyzer import DocxAnalyzer
+from modul_app.docx_analyzer import DocxAnalyzer
 from werkzeug.utils import secure_filename
-from app.models.ResponseModel import ResponseModel, ErrorResponseModel
+from modul_app.models.ResponseModel import ResponseModel, ErrorResponseModel
 import os
 import json
 
-from app.database.process_repository import (
+from modul_app.database.process_repository import (
     get_process_by_id,
     put_file,
     get_file,
     delete_file
 )
 
-from app.database.file_repository import (insert_my_file, delete_template_file, save_result_file_in_db)
-from app.models.my_file import MyFile
+from modul_app.database.file_repository import (insert_my_file, delete_template_file, save_result_file_in_db)
+from modul_app.models.my_file import MyFile
 
 docx = Blueprint('docx', __name__)
 ALLOWED_EXTENSIONS = {'docx', 'json'}

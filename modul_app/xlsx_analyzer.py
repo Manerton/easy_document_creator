@@ -4,7 +4,7 @@ from openpyxl import workbook, load_workbook
 from openpyxl.cell import Cell
 from openpyxl.worksheet import worksheet
 
-from token_xlsx import TokenXlsx, TokenTypeXlsx, TokenTypeCollection
+from modul_app.token_xlsx import TokenXlsx, TokenTypeXlsx, TokenTypeCollection
 
 
 class XlsxAnalyzer:
@@ -166,7 +166,7 @@ class XlsxAnalyzer:
 
             type_value = type(value)
             if type_value == TokenTypeXlsx:
-                if min_glob is None or min_glob < value.num_row:
+                if min_glob is None or min_glob > value.num_row:
                     min_glob = value.num_row
             else:
                 self.__min_row(value, min_glob)

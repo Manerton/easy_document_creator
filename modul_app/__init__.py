@@ -1,0 +1,5 @@
+import modul_app.token_docx
+import modul_app.token_xlsx
+import modul_app.docx_analyzer
+import modul_app.xlsx_analyzer
+import modul_app.main

@@ -1,14 +1,14 @@
 from flask import request, jsonify, Blueprint
 from flask_login import login_required, current_user
 
-from app.database.user_repository import (
+from modul_app.database.user_repository import (
     get_users,
     get_user_by_id,
     update_user,
     delete_user
 )
-from app.models.ResponseModel import ResponseModel, ErrorResponseModel
-from app.models.user import User
+from modul_app.models.ResponseModel import ResponseModel, ErrorResponseModel
+from modul_app.models.user import User
 
 user = Blueprint('user', __name__)
 

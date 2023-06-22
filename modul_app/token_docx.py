@@ -144,15 +144,25 @@ class Tokens:
             temp_token = TokenTypeCollection()
             temp_token.table = table
             temp_token.main_token = clear_token_list[0]
-            sub_token = TokenTypeString()
-            sub_token.font = font
-            sub_token.old_text_paragraph = paragraph.text
-            sub_token.main_token = full_name
-            sub_token.paragraph = paragraph
-            sub_token.format = paragraph.paragraph_format
-            temp_token.sub_tokens.update({clear_token_list[1]: sub_token})
             if parent is not None:
                 temp_token.parent = parent
                 parent.sub_tokens.update({clear_token_list[0]: temp_token})
             else:
                 self.TokensTypeCollection.update({clear_token_list[0]: temp_token})
+            if len(clear_token_list) == 2:
+                sub_token = TokenTypeString()
+                sub_token.font = font
+                sub_token.old_text_paragraph = paragraph.text
+                sub_token.main_token = full_name
+                sub_token.paragraph = paragraph
+                sub_token.format = paragraph.paragraph_format
+                temp_token.sub_tokens.update({clear_token_list[1]: sub_token})
+                if parent is not None:
+                    temp_token.parent = parent
+                    parent.sub_tokens.update({clear_token_list[0]: temp_token})
+                else:
+                    self.TokensTypeCollection.update({clear_token_list[0]: temp_token})
+            else:
+                delete_str = clear_token_list[0] + "."
+                clear_token = remove_prefix(clear_token, delete_str)
+                self.add_token_type_collection(clear_token, full_name, paragraph, table, temp_token)

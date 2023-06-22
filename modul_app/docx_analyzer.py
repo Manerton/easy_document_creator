@@ -8,7 +8,7 @@ from docx.text.font import Font
 from docx.text.paragraph import Paragraph
 import copy
 
-from token_docx import Tokens, TokenTypeString, TokenTypeCollection, SupportTable, get_font_and_size, \
+from modul_app.token_docx import Tokens, TokenTypeString, TokenTypeCollection, SupportTable, get_font_and_size, \
     set_font_and_size
 
 

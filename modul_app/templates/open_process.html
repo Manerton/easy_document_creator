@@ -7,6 +7,9 @@
                 Процесс {{ process.name }}
             {% endblock %}
         </h1>
+        <button onclick="copy('{{ process.id }}', '#copy_button_1')"
+                id="copy_button_1" class="d-flex btn btn-outline-primary btn-sm  btn-15 copy-button">Copy ID
+        </button>
     </div>
     {% with messages = get_flashed_messages() %}
     {% if messages %}
@@ -71,4 +74,28 @@
         <hr/>
         <div class="m-5 text-center">Файлы отсутствуют</div>
     {% endif %}
+
+    <script>
+        document.querySelectorAll('[data-bs-toggle="tooltip"]')
+          .forEach(tooltip => {
+            new bootstrap.Tooltip(tooltip)
+          })
+    </script>
+    <script>
+    function copy(text, target) {
+        setTimeout(function () {
+        $('#copied_tip').remove();
+        }, 800);
+        $(target).append("<div class='tip' id='copied_tip'><i class='ms-1 bi bi-clipboard-check '></i></div>");
+        var input = document.createElement('input');
+        input.setAttribute('value', text);
+        document.body.appendChild(input);
+        input.select();
+        var result = document.execCommand('copy');
+        document.body.removeChild(input)
+        return result;
+    }
+    </script>
+
+
 {% endblock %}

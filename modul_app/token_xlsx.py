@@ -114,18 +114,28 @@ class TokenXlsx:
         else:
             temp_token = TokenTypeCollection()
             temp_token.main_token = clear_token_list[0]
-            sub_token = TokenTypeXlsx()
-            sub_token.token_name = full_name
-            sub_token.cell = cell
-            sub_token.my_style.font = cell.font
-            sub_token.my_style.alignment = cell.alignment
-            sub_token.my_style.fill = cell.fill
-            sub_token.text_cell = cell.value
-            sub_token.num_row = cell.row
-            sub_token.merge = self.cell_is_merge(cell)
-            temp_token.sub_tokens.update({clear_token_list[1]: sub_token})
             if parent is not None:
                 temp_token.parent = parent
                 parent.sub_tokens.update({clear_token_list[0]: temp_token})
             else:
                 self.tokens_collection.update({clear_token_list[0]: temp_token})
+            if len(clear_token_list) == 2:
+                sub_token = TokenTypeXlsx()
+                sub_token.token_name = full_name
+                sub_token.cell = cell
+                sub_token.my_style.font = cell.font
+                sub_token.my_style.alignment = cell.alignment
+                sub_token.my_style.fill = cell.fill
+                sub_token.text_cell = cell.value
+                sub_token.num_row = cell.row
+                sub_token.merge = self.cell_is_merge(cell)
+                temp_token.sub_tokens.update({clear_token_list[1]: sub_token})
+                if parent is not None:
+                    temp_token.parent = parent
+                    parent.sub_tokens.update({clear_token_list[0]: temp_token})
+                else:
+                    self.tokens_collection.update({clear_token_list[0]: temp_token})
+            else:
+                delete_str = clear_token_list[0] + '.'
+                clear_token = remove_prefix(clear_token, delete_str)
+                self.add_token_type_collection(clear_token, full_name, cell, temp_token)
