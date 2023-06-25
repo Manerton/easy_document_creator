@@ -19,7 +19,7 @@
             {% if current_user.is_authenticated %}
                 <div class="d-flex align-items-center ">
                     <nav class="my-2 my-md-0 mr-md-3 me-4">
-                      <a class="p-2 text-dark" href="#">Документация</a>
+                      <a class="p-2 text-dark" href="{{ url_for('main.documentation_page') }}">Документация</a>
                       <a class="p-2 text-dark" href="{{ url_for('main.about_page') }}">О сервисе</a>
                     </nav>
                     <a class="btn btn-outline-primary" href="{{ url_for('auth.logout') }}">Выйти</a>

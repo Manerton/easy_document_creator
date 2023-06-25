@@ -1,0 +1,6 @@
+{
+  "MONGO_URI": "mongodb://localhost:27017/EDCDB",
+  "UPLOAD_FOLDER": "./temp_downloads",
+  "HOST": "127.0.0.1",
+  "PORT": "8080"
+}

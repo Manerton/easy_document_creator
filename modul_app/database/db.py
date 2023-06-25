@@ -3,9 +3,10 @@ from flask_pymongo import PyMongo
 from gridfs import GridFS
 
 from modul_app.main import app
+from settings import settings
 
 
-app.config['MONGO_URI'] = "mongodb://localhost:27017/EDCDB"
+app.config['MONGO_URI'] = settings.MONGO_URI
 mongo_client = PyMongo(app)
 db = mongo_client.db
 # Место хранения файлов

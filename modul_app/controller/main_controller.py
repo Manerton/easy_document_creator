@@ -20,6 +20,9 @@ def start_page():
 def about_page():
     return render_template('about_program.html')
 
+@main.route("/documentation", methods=['GET'])
+def documentation_page():
+    return render_template('documentation.html')
 
 @main.route('/uploads/<name>')
 def download_file(name):

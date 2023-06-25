@@ -1,4 +1,6 @@
 import os
+import settings
+from settings import settings
 from flask import Flask
 import webview
 from flask_login import LoginManager
@@ -8,8 +10,7 @@ app = Flask(__name__)
 app.secret_key = os.urandom(24)
 
 # папка для сохранения загруженных файлов
-UPLOAD_FOLDER = './temp_downloads'
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['UPLOAD_FOLDER'] = settings.UPLOAD_FOLDER
 
 login_manager = LoginManager()
 login_manager.login_view = 'auth.login'

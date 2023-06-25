@@ -101,13 +101,6 @@ class XlsxAnalyzer:
             self.active_worksheet.insert_rows(num_row+1)
         return num_row + 1
 
-    # def append_new_line_for_table(self, collection: TokenTypeCollection):
-    #     for sub_token in collection:
-    #         value: TokenTypeXlsx or TokenTypeCollection = collection.get(sub_token)
-    #         type_value = type(value)
-    #         if type_value == TokenTypeXlsx:
-    #             self.add_line(value.cell)
-
     def __create_full_name(self, first_name, second_name):
         return first_name + '.' + second_name
 
