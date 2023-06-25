@@ -35,7 +35,7 @@ def allowed_file(filename):
 
 # Генерация документа сиюминутным способом со стороны стороннего сервиса через api
 @xlsx.route("/api/generate/now/file-xlsx/", methods=['POST'])
-async def api_now_file_docx():
+async def api_now_file_xlsx():
     api_key = request.headers.environ.get('HTTP_AUTHORIZATION')
     if api_key is None or not await check_api_key(api_key):
         return ErrorResponseModel("Error api-key", 400, "Invalid api-key")

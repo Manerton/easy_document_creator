@@ -65,7 +65,7 @@ async def api_now_file_docx():
 
 
 @docx.route("/api/generate/now/file-docx/<process_id>", methods=['POST'])
-async def api_now_file_docx_process(process_id):
+async def api_now_file_docx_with_process(process_id):
     api_key = request.headers.environ.get('HTTP_AUTHORIZATION')
     if api_key is None or not await check_api_key(api_key):
         return ErrorResponseModel("Error api-key", 400, "Invalid api-key")
@@ -89,7 +89,7 @@ async def api_now_file_docx_process(process_id):
 
 # Генерация документа отложенным способом со стороны стороннего сервиса через api
 @docx.route("/api/generate/file-docx/<process_id>", methods=['POST'])
-async def api_file_docx_process(process_id):
+async def api_file_docx_with_process(process_id):
     api_key = request.headers.environ.get('HTTP_AUTHORIZATION')
     if api_key is None or not await check_api_key(api_key):
         return ErrorResponseModel("Error api-key", 400, "Invalid api-key")
