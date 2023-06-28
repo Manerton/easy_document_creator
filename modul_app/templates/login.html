@@ -11,20 +11,20 @@
                     </div>
             {% endif %}
             {% endwith %}
-            <h3 class="title mb-3">Login</h3>
+            <h3 class="title mb-3">Вход</h3>
             <form method="POST" action="{{ url_for('auth.login') }}">
               <!-- Email input -->
                 <div class="form-outline mb-1">
-                    <label class="form-label mt-1" for="form3Example3">Email address</label>
+                    <label class="form-label mt-1" for="form3Example3">Email адрес</label>
                     <input type="email" name="email" class="form-control"
-                      placeholder="Enter a valid email address" />
+                      placeholder="Введите email адрес" />
                 </div>
 
               <!-- Password input -->
                 <div class="form-outline mb-1">
-                    <label class="form-label mt-1" for="form3Example4">Password</label>
+                    <label class="form-label mt-1" for="form3Example4">Пароль</label>
                     <input type="password" name="password" class="form-control"
-                      placeholder="Enter password" />
+                      placeholder="Введите пароль" />
                 </div>
 
                 <div class="d-flex justify-content-between align-items-center">
@@ -32,12 +32,12 @@
                     <div class="form-check mb-1 mt-2">
                         <input class="form-check-input me-2" type="checkbox" value="" id="form2Example3" />
                         <label class="form-check-label" for="form2Example3">
-                            Remember me
+                            Запомнить меня
                         </label>
                     </div>
                 </div>
                  <div class="form-outline mb-1">
-                    <button class="btn btn-primary form-control">Login</button>
+                    <button class="btn btn-primary form-control">Войти</button>
                 </div>
             </form>
         </div>

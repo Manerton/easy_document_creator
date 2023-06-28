@@ -26,7 +26,7 @@
                     <th draggable="false" class="is-sortable is-unselectable is-current-sort">
                         <div class="th-wrap">
                             <span class="is-relative">
-                                Описание
+                                Формат
                             </span>
                         </div>
                     </th>
@@ -47,8 +47,8 @@
                         {% if process.file_type == "docx" %}<i class="bi bi-filetype-docx"></i> {% endif %}
                         {{process.name}}
                     </td>
-                    <td data-label="Описание" class="">
-                        {{ process.description }}
+                    <td data-label="Формат" class="">
+                        {{ process.file_type }}
                     </td>
                     <td>
                         <a href="{{ url_for('process.get_process', id=process.id) }}" role="button" class="bi bi-pencil btn btn-outline-primary" >

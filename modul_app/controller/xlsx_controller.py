@@ -40,7 +40,7 @@ async def api_now_file_xlsx():
     if api_key is None or not await check_api_key(api_key):
         return ErrorResponseModel("Error api-key", 400, "Invalid api-key")
     if not request.files.get('file', None):
-        return ErrorResponseModel("Error __data", 400, "Files not Found")
+        return ErrorResponseModel("Error data", 400, "Files not Found")
     list_filenames = await create_filenames_for_xlsx()
     files = request.files.getlist("file")
     for file in files:
@@ -51,7 +51,7 @@ async def api_now_file_xlsx():
             elif filename.endswith('.json'):
                 file.save(os.path.join(app.config['UPLOAD_FOLDER'], list_filenames[1]))
         else:
-            return ErrorResponseModel('Error __data', 400, 'Invalid file type')
+            return ErrorResponseModel('Error data', 400, 'Invalid file type')
     await xlsx_worker(list_filenames[0], list_filenames[1], list_filenames[2])
     # Открытие сохранённого готового файла
     save_file = open(os.path.join(app.config['UPLOAD_FOLDER'], list_filenames[2]), 'rb')
@@ -70,10 +70,15 @@ async def api_now_file_xlsx_with_process(process_id):
     api_key = request.headers.environ.get('HTTP_AUTHORIZATION')
     if api_key is None or not await check_api_key(api_key):
         return ErrorResponseModel("Error api-key", 400, "Invalid api-key")
+    process = get_process_by_id(process_id)
+    if process is None:
+        return ErrorResponseModel("Error process", 400, "Process not Found")
+    if process["file_type"] != "xlsx":
+        return ErrorResponseModel("Error process", 400, "The template file type does not match the api request")
     if request.files.get('file', None):
         json_file = request.files['file']
         if not json_file.filename.endswith('.json'):
-            return ErrorResponseModel("Error __data", 400, "Invalid file type")
+            return ErrorResponseModel("Error data", 400, "Invalid file type")
         list_filenames = await create_filenames_for_xlsx()
         await start_create_xlsx_with_process(process_id, json_file, list_filenames, True)
         # Открытие сохранённого готового файла
@@ -86,7 +91,7 @@ async def api_now_file_xlsx_with_process(process_id):
         _type = mimetypes.guess_type(list_filenames[2])
         response.mimetype = _type[0]
         return response
-    return ErrorResponseModel("Error __data", 400, "File not Found")
+    return ErrorResponseModel("Error data", 400, "File not Found")
 
 
 @xlsx.route("/api/generate/file-xlsx/<process_id>", methods=['POST'])
@@ -94,10 +99,15 @@ async def api_file_xlsx_with_process(process_id):
     api_key = request.headers.environ.get('HTTP_AUTHORIZATION')
     if api_key is None or not await check_api_key(api_key):
         return ErrorResponseModel("Error api-key", 400, "Invalid api-key")
+    process = get_process_by_id(process_id)
+    if process is None:
+        return ErrorResponseModel("Error process", 400, "Process not Found")
+    if process["file_type"] != "xlsx":
+        return ErrorResponseModel("Error process", 400, "The template file type does not match the api request")
     if request.files.get('file', None):
         json_file = request.files['file']
         if not json_file.filename.endswith('.json'):
-            return ErrorResponseModel("Error __data", 400, "Invalid file type")
+            return ErrorResponseModel("Error data", 400, "Invalid file type")
         list_filenames = await create_filenames_for_xlsx()
         file_id = await start_create_xlsx_with_process(process_id, json_file, list_filenames)
         # Подготавливаем ответ
@@ -105,7 +115,7 @@ async def api_file_xlsx_with_process(process_id):
         response.status_code = 202
         response.location = request.host_url + url_for('process.download_xlsx_result_file_api', file_id=file_id)
         return response
-    return ErrorResponseModel("Error __data", 400, "File not Found")
+    return ErrorResponseModel("Error data", 400, "File not Found")
 
 
 @xlsx.route("/generate/file-xlsx/<process_id>", methods=['POST'])

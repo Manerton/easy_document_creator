@@ -235,9 +235,11 @@ class DocxAnalyzer:
         last_token = None
         simple_repeat = self.__all_same(list_data[0])
         for data in list_data:
+
             if i < len(list_data):
                 be_more = True
                 if simple_repeat and temp_token_collection.table:
+
                     temp_token_collection.table.row = self.__create_new_row(temp_token_collection.table.row.cells,
                                                                             temp_token_collection.table.table,
                                                                             temp_token_collection.table.row.height)

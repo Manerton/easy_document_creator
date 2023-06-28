@@ -27,8 +27,8 @@
             {% endif %}
             {% if not current_user.is_authenticated %}
             <nav class="my-2 my-md-0 mr-md-3">
-                <a class="p-2 text-dark" href="{{ url_for('auth.login') }}">login</a>
-                <a class="p-2 text-dark" href="{{ url_for('auth.signup') }}">Sign Up</a>
+                <a class="p-2 text-dark" href="{{ url_for('auth.login') }}">Войти</a>
+                <a class="p-2 text-dark" href="{{ url_for('auth.signup') }}">Регистрация</a>
             </nav>
             {% endif %}
         </div>
