@@ -42,6 +42,8 @@ async def api_now_file_docx():
         return ErrorResponseModel("Error data", 400, "Files not Found")
     list_filenames = await create_filenames_for_docx()
     files = request.files.getlist("file")
+    if len(files) != 2:
+        return ErrorResponseModel('Error count Files', 400, 'The number of files must be equal to 2')
     for file in files:
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
