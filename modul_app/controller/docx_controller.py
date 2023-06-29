@@ -44,13 +44,19 @@ async def api_now_file_docx():
     files = request.files.getlist("file")
     if len(files) != 2:
         return ErrorResponseModel('Error count Files', 400, 'The number of files must be equal to 2')
+    have_docx = False
+    have_json = False
     for file in files:
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
-            if filename.endswith('.docx'):
+            if filename.endswith('.docx') and not have_docx:
+                have_docx = True
                 file.save(os.path.join(app.config['UPLOAD_FOLDER'], list_filenames[0]))
-            elif filename.endswith('.json'):
+            elif filename.endswith('.json') and not have_json:
+                have_json = True
                 file.save(os.path.join(app.config['UPLOAD_FOLDER'], list_filenames[1]))
+            else:
+                return ErrorResponseModel('Error data', 400, 'One of the file types was not detected')
         else:
             return ErrorResponseModel('Error data', 400, 'Invalid file type')
     await docx_worker(list_filenames[0], list_filenames[1], list_filenames[2])
